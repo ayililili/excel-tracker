@@ -26,7 +26,7 @@ async function copySingleCellToAnotherSheet() {
       // 使用 fetch 進行 POST 請求
 
       // eslint-disable-next-line no-undef
-      const response = await fetch("http://192.168.50.56:3000/", {
+      const response = await fetch("http://localhost:3001/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
