@@ -121,7 +121,7 @@ async function syncTableWithApi() {
       // 逐行處理 API 資料
       workbookData.forEach(async (item) => {
         const id = item.id;
-        const row = colRange.findIndex((row) => row[0] === id) + 2; // 回傳行號（從 2 開始）
+        const row = colRange.values.findIndex((row) => row[0] === id) + 2; // 回傳行號（從 2 開始）
         console.log(row);
         item.items.forEach(async (field) => {
           // 根據編號和項目名稱找到儲存格並填充值
@@ -150,7 +150,10 @@ async function syncTableWithApi() {
 
 // 根據編號查找行
 async function findRowById(colRange, id) {
-  return colRange.findIndex((row) => row[0] === id) + 2; // 回傳行號（從 2 開始）
+  const range = sheet.getRange("A2:A1000"); // 假設編號列在 A 列
+  range.load("values"); // 加載範圍值
+  await sheet.context.sync(); // 確保範圍的值已經同步
+  return colRange.values.findIndex((row) => row[0] === id) + 2; // 回傳行號（從 2 開始）
 }
 
 // 根據標題查找列
