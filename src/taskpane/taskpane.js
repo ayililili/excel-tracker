@@ -112,36 +112,35 @@ async function syncTableWithApi() {
 
     await Excel.run(async (context) => {
       const sheet = context.workbook.worksheets.getActiveWorksheet();
-      await context.sync();
-
-      // 逐行處理 API 資料
-      // workbookData.forEach(async (item) => {
-      // const id = item.id;
       const range = sheet.getRange("A2:A1000");
       range.load("values");
       await context.sync();
-      console.log(range.values);
-      // item.items.forEach(async (field) => {
-      // 根據編號和項目名稱找到儲存格並填充值
-      // const row = findRowById(sheet, id);
-      // const col = findColumnByHeader(sheet, field.header);
 
-      // if (row && col) {
-      //   const cell = sheet.getRange(`${col}${row}`);
-      //   cell.load("values"); // 加載儲存格的值
-      //   await context.sync(); // 確保值已經同步
+      // 逐行處理 API 資料
+      workbookData.forEach(async (item) => {
+        const id = item.id;
+        console.log(range.values);
+        // item.items.forEach(async (field) => {
+        // 根據編號和項目名稱找到儲存格並填充值
+        // const row = findRowById(sheet, id);
+        // const col = findColumnByHeader(sheet, field.header);
 
-      //   const currentValue = cell.values[0][0];
+        // if (row && col) {
+        //   const cell = sheet.getRange(`${col}${row}`);
+        //   cell.load("values"); // 加載儲存格的值
+        //   await context.sync(); // 確保值已經同步
 
-      //   // 如果儲存格值與新值不同，將儲存格背景設置為黃色
-      //   if (currentValue !== field.value) {
-      //     cell.values = [[field.value]];
-      //     cell.format.fill.color = "yellow"; // 設置背景顏色為黃色
-      //     console.log(`儲存格 ${cell.address} 更新為：${field.value}`);
-      //   }
-      // }
-      // });
-      // });
+        //   const currentValue = cell.values[0][0];
+
+        //   // 如果儲存格值與新值不同，將儲存格背景設置為黃色
+        //   if (currentValue !== field.value) {
+        //     cell.values = [[field.value]];
+        //     cell.format.fill.color = "yellow"; // 設置背景顏色為黃色
+        //     console.log(`儲存格 ${cell.address} 更新為：${field.value}`);
+        // }
+        // }
+        // });
+      });
 
       await context.sync();
     });
