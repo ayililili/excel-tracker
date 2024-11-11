@@ -119,8 +119,8 @@ async function syncTableWithApi() {
         const id = item.id;
         const range = sheet.getRange("A2:A1000");
         range.load("values");
-        await sheet.context.sync();
-        console.log(range.values[0]);
+        await context.sync();
+        console.log(range.values);
         // item.items.forEach(async (field) => {
         // 根據編號和項目名稱找到儲存格並填充值
         // const row = findRowById(sheet, id);
