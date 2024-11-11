@@ -82,7 +82,7 @@ async function sendChangesToApi() {
     if (changeEntries.length > 0) {
       // 將物件轉換成數組，以便於發送
       const requestBody = {
-        filename: workbookName,
+        id: workbookName,
         data: changeEntries.map(([header, value]) => ({ header, value })),
       };
 
