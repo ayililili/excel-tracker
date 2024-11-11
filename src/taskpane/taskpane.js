@@ -1,7 +1,7 @@
 /* global console, document, Excel, Office */
 
-// 用來儲存變更的儲存格紀錄
-let changes = [];
+// 用來儲存變更的儲存格紀錄，以地址作為索引
+let changes = {};
 
 // 當 Add-in 加載後啟動
 Office.onReady((info) => {
@@ -30,8 +30,8 @@ async function monitorCellChanges() {
         const changedCell = eventArgs.address;
         const newValue = eventArgs.details.valueAfter;
 
-        // 紀錄資料，包含儲存格座標和數值
-        changes.push({ address: changedCell, value: newValue });
+        // 使用儲存格地址作為索引，僅保留最後更動的值
+        changes[changedCell] = newValue;
 
         console.log(`儲存格 ${changedCell} 改為：${newValue}`);
       });
@@ -46,9 +46,10 @@ async function monitorCellChanges() {
 // 當用戶點擊 'run' 時，將儲存格紀錄發送到 API
 async function sendChangesToApi() {
   try {
-    if (changes.length > 0) {
-      // 準備 API 請求的數據
-      const requestBody = { data: changes };
+    const changeEntries = Object.entries(changes);
+    if (changeEntries.length > 0) {
+      // 將物件轉換成數組，以便於發送
+      const requestBody = { data: changeEntries.map(([address, value]) => ({ address, value })) };
 
       // 使用 fetch 進行 POST 請求
       const response = await fetch("http://localhost:3001/", {
@@ -62,7 +63,7 @@ async function sendChangesToApi() {
       if (response.ok) {
         console.log("數據已成功上傳到 API");
         // 上傳後清空紀錄
-        changes = [];
+        changes = {};
       } else {
         console.error("上傳失敗，狀態碼：", response.status);
       }
