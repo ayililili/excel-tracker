@@ -18,6 +18,9 @@ Office.onReady((info) => {
 
     // 當用戶點擊 'run' 按鈕時發送 API 請求
     document.getElementById("run").onclick = sendChangesToApi;
+
+    // 當用戶點擊 'sync' 按鈕時同步表格
+    document.getElementById("sync").onclick = syncTableWithApi;
   }
 });
 
@@ -87,6 +90,78 @@ async function monitorCellChanges() {
   } catch (error) {
     console.error("監聽儲存格變化錯誤：", error);
   }
+}
+
+// 當用戶點擊 'sync' 按鈕時，根據 API 數據同步表格
+async function syncTableWithApi() {
+  try {
+    const response = await fetch("http://localhost:3001/");
+    if (!response.ok) {
+      throw new Error("無法從 API 取得資料");
+    }
+
+    const data = await response.json();
+    console.log("從 API 讀取的資料：", data);
+
+    // 只處理當前工作簿名稱對應的資料
+    const workbookData = data[workbookName];
+    if (!workbookData) {
+      console.log("沒有匹配的資料來自 API");
+      return;
+    }
+
+    await Excel.run(async (context) => {
+      const sheet = context.workbook.worksheets.getActiveWorksheet();
+
+      // 逐行處理 API 資料
+      workbookData.forEach((item) => {
+        const id = item.id;
+        item.items.forEach(async (field) => {
+          // 根據編號和項目名稱找到儲存格並填充值
+          const row = findRowById(sheet, id);
+          const col = findColumnByHeader(sheet, field.header);
+
+          if (row && col) {
+            const cell = sheet.getRange(`${col}${row}`);
+            cell.load("values"); // 加載儲存格的值
+            await context.sync(); // 確保值已經同步
+
+            const currentValue = cell.values[0][0];
+
+            // 如果儲存格值與新值不同，將儲存格背景設置為黃色
+            if (currentValue !== field.value) {
+              cell.values = [[field.value]];
+              cell.format.fill.color = "yellow"; // 設置背景顏色為黃色
+              console.log(`儲存格 ${cell.address} 更新為：${field.value}`);
+            }
+          }
+        });
+      });
+
+      await context.sync();
+    });
+  } catch (error) {
+    console.error("同步表格資料時發生錯誤：", error);
+  }
+}
+
+// 根據編號查找行
+async function findRowById(sheet, id) {
+  const range = sheet.getRange("A2:A1000"); // 假設編號列在 A 列
+  range.load("values"); // 加載範圍值
+  await sheet.context.sync(); // 確保範圍的值已經同步
+  return range.values.findIndex((row) => row[0] === id) + 2; // 回傳行號（從 2 開始）
+}
+
+// 根據標題查找列
+async function findColumnByHeader(sheet, header) {
+  const range = sheet.getRange("1:1"); // 假設標題行在第 1 行
+  range.load("values"); // 加載標題行
+  await sheet.context.sync(); // 確保標題行的值已經同步
+  const headerRow = range.values[0];
+
+  const colIndex = headerRow.findIndex((colHeader) => colHeader === header);
+  return colIndex >= 0 ? String.fromCharCode(65 + colIndex) : null; // 返回列標識（如 A、B、C 等）
 }
 
 // 當用戶點擊 'run' 時，將儲存格紀錄和檔案名發送到 API
