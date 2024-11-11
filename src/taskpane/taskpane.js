@@ -112,7 +112,7 @@ async function syncTableWithApi() {
 
     await Excel.run(async (context) => {
       const sheet = context.workbook.worksheets.getActiveWorksheet();
-      const range = sheet.getRange("A2:A1000");
+      const range = sheet.getRange("A:A");
       range.load("values");
       await context.sync();
 
