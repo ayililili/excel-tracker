@@ -60,7 +60,7 @@ async function monitorCellChanges() {
         }
 
         // 獲取編號列（第一列）的值
-        const idCell = `A${row}`;  // 取得第一列的編號
+        const idCell = `A${row}`; // 取得第一列的編號
         const idRange = sheet.getRange(idCell);
         idRange.load("values");
 
@@ -112,6 +112,7 @@ async function syncTableWithApi() {
 
     await Excel.run(async (context) => {
       const sheet = context.workbook.worksheets.getActiveWorksheet();
+      await context.sync();
 
       // 逐行處理 API 資料
       workbookData.forEach((item) => {
@@ -174,7 +175,7 @@ async function sendChangesToApi() {
         id: workbookName,
         data: changeEntries.map(([id, items]) => ({
           id,
-          items: Object.entries(items).map(([header, value]) => ({ header, value }))
+          items: Object.entries(items).map(([header, value]) => ({ header, value })),
         })),
       };
 
