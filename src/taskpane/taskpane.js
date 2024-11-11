@@ -116,7 +116,7 @@ async function syncTableWithApi() {
 
       // 逐行處理 API 資料
       // workbookData.forEach(async (item) => {
-      const id = item.id;
+      // const id = item.id;
       const range = sheet.getRange("A2:A1000");
       range.load("values");
       await context.sync();
