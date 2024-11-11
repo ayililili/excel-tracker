@@ -42,6 +42,7 @@ async function monitorCellChanges() {
 
       // 監聽儲存格變化事件
       sheet.onChanged.add(async (eventArgs) => {
+        console.log(eventArgs);
         const changedCell = eventArgs.address;
         const newValue = eventArgs.details.valueAfter;
 
