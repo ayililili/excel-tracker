@@ -118,7 +118,6 @@ async function syncTableWithApi() {
       workbookData.forEach(async (item) => {
         const id = item.id;
         const range = sheet.getRange("A2:A1000");
-        // TODO:
         range.load("values");
         await sheet.context.sync();
         console.log(range.values);
