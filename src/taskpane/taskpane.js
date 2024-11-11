@@ -117,9 +117,10 @@ async function syncTableWithApi() {
       // 逐行處理 API 資料
       workbookData.forEach(async (item) => {
         const id = item.id;
-        const range = sheet.getRange("A2:A1000"); // 假設編號列在 A 列
-        range.load("values"); // 加載範圍值
-        await sheet.context.sync(); // 確保範圍的值已經同步
+        const range = sheet.getRange("A2:A1000");
+        // TODO:
+        range.load("values");
+        await sheet.context.sync();
         console.log(range.values);
         // item.items.forEach(async (field) => {
         // 根據編號和項目名稱找到儲存格並填充值
