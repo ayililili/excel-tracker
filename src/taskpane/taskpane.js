@@ -25,8 +25,11 @@ Office.onReady((info) => {
 async function getWorkbookName() {
   try {
     await Excel.run(async (context) => {
-      workbookName = context.workbook.name;
+      const workbook = context.workbook;
+      workbook.load("name"); // Explicitly load the 'name' property
+
       await context.sync();
+      workbookName = workbook.name;
       console.log(`檔案名：${workbookName}`);
     });
   } catch (error) {
