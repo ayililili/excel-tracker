@@ -28,7 +28,7 @@ async function monitorCellChanges() {
         // 紀錄變更的儲存格資料
         console.log(eventArgs);
         const changedCell = eventArgs.address;
-        const newValue = eventArgs.newValue;
+        const newValue = eventArgs.details.valueAfter;
 
         // 紀錄資料，包含儲存格座標和數值
         changes.push({ address: changedCell, value: newValue });
