@@ -119,6 +119,7 @@ async function syncTableWithApi() {
         const id = item.id;
         const range = sheet.getRange("A2:A1000");
         // TODO:
+        sheet.load("values");
         console.log(range);
         // item.items.forEach(async (field) => {
         // 根據編號和項目名稱找到儲存格並填充值
