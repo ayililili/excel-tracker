@@ -17,20 +17,27 @@ async function copySingleCellToAnotherSheet() {
       sourceCell.load("values"); // 載入 A1 儲存格的數據
       await context.sync();
 
-      // 檢查是否已存在目標工作表 (B 工作表)
-      let targetSheet;
-      try {
-        targetSheet = context.workbook.worksheets.getItem("TargetSheet");
-      } catch (e) {
-        targetSheet = context.workbook.worksheets.add("TargetSheet");
+      // 獲取 A1 儲存格的值
+      const cellValue = sourceCell.values[0][0];
+
+      // 準備 API 請求的數據
+      const requestBody = { data: cellValue };
+
+      // 使用 fetch 進行 POST 請求
+      // eslint-disable-next-line no-undef
+      const response = await fetch("http://192.168.50.56:3000/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (response.ok) {
+        console.log("數據已成功上傳到 API");
+      } else {
+        console.error("上傳失敗，狀態碼：", response.status);
       }
-
-      // 將 A1 儲存格的數據寫入到 TargetSheet 中的 B2 儲存格
-      const targetCell = targetSheet.getRange("B2");
-      targetCell.values = sourceCell.values;
-
-      await context.sync();
-      console.log("已成功將 A1 儲存格的內容複製到 TargetSheet 的 B2 儲存格。");
     });
   } catch (error) {
     console.error("錯誤：", error);
