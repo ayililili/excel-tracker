@@ -149,11 +149,8 @@ async function syncTableWithApi() {
 }
 
 // 根據編號查找行
-async function findRowById(sheet, id) {
-  const range = sheet.getRange("A2:A1000"); // 假設編號列在 A 列
-  range.load("values"); // 加載範圍值
-  await sheet.context.sync(); // 確保範圍的值已經同步
-  return range.values.findIndex((row) => row[0] === id) + 2; // 回傳行號（從 2 開始）
+async function findRowById(colRange, id) {
+  return colRange.findIndex((row) => row[0] === id) + 2; // 回傳行號（從 2 開始）
 }
 
 // 根據標題查找列
