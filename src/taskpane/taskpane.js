@@ -121,7 +121,7 @@ async function syncTableWithApi() {
       // 逐行處理 API 資料
       workbookData.forEach(async (item) => {
         const id = item.id;
-        const row = findRowById(colRange, id);
+        const row = colRange.findIndex((row) => row[0] === id) + 2; // 回傳行號（從 2 開始）
         console.log(row);
         item.items.forEach(async (field) => {
           // 根據編號和項目名稱找到儲存格並填充值
