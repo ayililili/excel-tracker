@@ -1,6 +1,6 @@
 /* global console, document, Excel, Office */
 
-// 用來儲存變更的儲存格紀錄，以欄位標頭作為索引
+// 用來儲存變更的儲存格紀錄，以編號作為索引
 let changes = {};
 let workbookName = "";
 
@@ -51,24 +51,35 @@ async function monitorCellChanges() {
 
         const [column, row] = changedCell.match(/[A-Z]+|\d+/g);
 
-        // 如果是標頭列（第一行），則不予記錄
-        if (parseInt(row, 10) === 1) {
+        // 如果是第一排（編號列）或第一行（項目列），則不予記錄
+        if (parseInt(row, 10) === 1 || parseInt(column, 10) === 1) {
           return;
         }
 
-        // 獲取標頭值
-        const headerCell = `${column}1`;
+        // 獲取編號列（第一列）的值
+        const idCell = `A${row}`;  // 取得第一列的編號
+        const idRange = sheet.getRange(idCell);
+        idRange.load("values");
+
+        // 獲取項目列（第一行）的值
+        const headerCell = `${column}1`; // 取得第一行的標題
         const headerRange = sheet.getRange(headerCell);
         headerRange.load("values");
 
         await context.sync();
 
-        const headerValue = headerRange.values[0][0];
+        const idValue = idRange.values[0][0]; // 取得編號
+        const headerValue = headerRange.values[0][0]; // 取得項目名稱
 
-        // 使用標頭值作為索引，僅保留最後更動的值
-        changes[headerValue] = newValue;
+        // 確保編號在紀錄物件中
+        if (!changes[idValue]) {
+          changes[idValue] = {};
+        }
 
-        console.log(`儲存格 ${changedCell}（${headerValue}）改為：${newValue}`);
+        // 使用編號作為索引，並將項目名稱和值加入
+        changes[idValue][headerValue] = newValue;
+
+        console.log(`儲存格 ${changedCell}（編號: ${idValue}, 項目: ${headerValue}）改為：${newValue}`);
       });
 
       await context.sync();
@@ -86,7 +97,10 @@ async function sendChangesToApi() {
       // 將物件轉換成數組，以便於發送
       const requestBody = {
         id: workbookName,
-        data: changeEntries.map(([header, value]) => ({ header, value })),
+        data: changeEntries.map(([id, items]) => ({
+          id,
+          items: Object.entries(items).map(([header, value]) => ({ header, value }))
+        })),
       };
 
       // 使用 fetch 進行 POST 請求
