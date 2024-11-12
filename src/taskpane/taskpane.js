@@ -127,8 +127,8 @@ async function syncTableWithApi() {
           colRange.values.findIndex((row) => {
             console.log(row[0]);
             console.log(id);
-            console.log(row[0] === id);
-            return row[0] === id;
+            console.log(row[0] == id);
+            return row[0] == id;
           }) + 2; // 回傳行號（從 2 開始）
         console.log(row);
         item.items.forEach(async (field) => {
