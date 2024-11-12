@@ -122,7 +122,7 @@ async function syncTableWithApi() {
       workbookData.forEach((item) => {
         const id = item.id;
         const row = colRange.values.findIndex((row) => row[0] == id) + 2; // 回傳行號（從 2 開始）
-        item.items.forEach(async (field) => {
+        item.items.forEach((field) => {
           // 根據編號和項目名稱找到儲存格並填充值
           const header = field.header;
           const col = rowRange.values.findIndex((col) => col == header);
@@ -134,7 +134,6 @@ async function syncTableWithApi() {
           }
         });
       });
-
       await context.sync();
     });
   } catch (error) {
