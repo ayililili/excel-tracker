@@ -117,35 +117,27 @@ async function syncTableWithApi() {
       const rowRange = sheet.getRange("B1:Z1");
       rowRange.load("values");
       await context.sync();
-      console.log(colRange);
 
       // 逐行處理 API 資料
       workbookData.forEach(async (item) => {
-        console.log(item);
         const id = item.id;
-        const row =
-          colRange.values.findIndex((row) => {
-            console.log(row[0]);
-            console.log(id);
-            console.log(row[0] == id);
-            return row[0] == id;
-          }) + 2; // 回傳行號（從 2 開始）
-        console.log(row);
+        const row = colRange.values.findIndex((row) => row[0] == id) + 2; // 回傳行號（從 2 開始）
         item.items.forEach(async (field) => {
           // 根據編號和項目名稱找到儲存格並填充值
-          // const col = findColumnByHeader(sheet, field.header);
-          // if (row && col) {
-          //   const cell = sheet.getRange(`${col}${row}`);
-          //   cell.load("values"); // 加載儲存格的值
-          //   await context.sync(); // 確保值已經同步
-          //   const currentValue = cell.values[0][0];
-          //   // 如果儲存格值與新值不同，將儲存格背景設置為黃色
-          //   if (currentValue !== field.value) {
-          //     cell.values = [[field.value]];
-          //     cell.format.fill.color = "yellow"; // 設置背景顏色為黃色
-          //     console.log(`儲存格 ${cell.address} 更新為：${field.value}`);
-          // }
-          // }
+          const header = field.header;
+          const col = headerRow.findIndex((col) => col === header);
+          if (row && col) {
+            const cell = sheet.getRange(`${col}${row}`);
+            cell.load("values"); // 加載儲存格的值
+            await context.sync(); // 確保值已經同步
+            const currentValue = cell.values[0][0];
+            // 如果儲存格值與新值不同，將儲存格背景設置為黃色
+            if (currentValue !== field.value) {
+              cell.values = [[field.value]];
+              cell.format.fill.color = "yellow"; // 設置背景顏色為黃色
+              console.log(`儲存格 ${cell.address} 更新為：${field.value}`);
+            }
+          }
         });
       });
 
