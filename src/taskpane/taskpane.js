@@ -125,7 +125,7 @@ async function syncTableWithApi() {
         item.items.forEach(async (field) => {
           // 根據編號和項目名稱找到儲存格並填充值
           const header = field.header;
-          const col = headerRow.findIndex((col) => col === header);
+          const col = rowRange.findIndex((col) => col === header);
           if (row && col) {
             const cell = sheet.getRange(`${col}${row}`);
             cell.load("values"); // 加載儲存格的值
