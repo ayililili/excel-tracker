@@ -119,7 +119,7 @@ async function syncTableWithApi() {
       await context.sync();
 
       // 逐行處理 API 資料
-      workbookData.forEach((item) => {
+      workbookData.forEach(async (item) => {
         const id = item.id;
         const row = colRange.values.findIndex((row) => row[0] == id) + 2; // 回傳行號（從 2 開始）
         item.items.forEach((field) => {
@@ -133,8 +133,8 @@ async function syncTableWithApi() {
             console.log(`儲存格 ${id}:${header} 更新為：${field.value}`);
           }
         });
+        await context.sync();
       });
-      await context.sync();
     });
   } catch (error) {
     console.error("同步表格資料時發生錯誤：", error);
