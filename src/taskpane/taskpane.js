@@ -125,8 +125,9 @@ async function syncTableWithApi() {
         const id = item.id;
         const row =
           colRange.values.findIndex((row) => {
-            console.log(row);
+            console.log(row[0]);
             console.log(id);
+            console.log(row[0] === id);
             return row[0] === id;
           }) + 2; // 回傳行號（從 2 開始）
         console.log(row);
