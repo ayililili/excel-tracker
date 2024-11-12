@@ -104,7 +104,7 @@ async function syncTableWithApi() {
     console.log("從 API 讀取的資料：", data);
 
     // 只處理當前工作簿名稱對應的資料
-    const workbookData = data[workbookName];
+    const workbookData = "Project.xlsx";
     if (!workbookData) {
       console.log("沒有匹配的資料來自 API");
       return;
