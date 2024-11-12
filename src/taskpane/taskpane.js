@@ -118,23 +118,30 @@ async function syncTableWithApi() {
       rowRange.load("values");
       await context.sync();
 
-      // 逐行處理 API 資料
-      workbookData.forEach(async (item) => {
+      // 使用 `for...of` 迴圈處理 API 資料
+      for (const item of workbookData) {
         const id = item.id;
-        const row = colRange.values.findIndex((row) => row[0] == id) + 2; // 回傳行號（從 2 開始）
-        item.items.forEach((field) => {
-          // 根據編號和項目名稱找到儲存格並填充值
-          const header = field.header;
-          const col = rowRange.values.findIndex((col) => col == header);
-          if (row && col) {
-            const cell = sheet.getRange(`${col}${row}`);
-            cell.values = [[field.value]];
-            cell.format.fill.color = "yellow"; // 設置背景顏色為黃色
-            console.log(`儲存格 ${id}:${header} 更新為：${field.value}`);
+        const rowIndex = colRange.values.findIndex((row) => row[0] == id);
+        const row = rowIndex !== -1 ? rowIndex + 2 : null; // 計算行號，若找不到則為 null
+
+        if (row) {
+          for (const field of item.items) {
+            const header = field.header;
+            const colIndex = rowRange.values[0].findIndex((col) => col == header);
+            const col = colIndex !== -1 ? String.fromCharCode(66 + colIndex) : null; // B 對應 66
+
+            if (col) {
+              const cell = sheet.getRange(`${col}${row}`);
+              cell.values = [[field.value]];
+              cell.format.fill.color = "yellow"; // 設置背景顏色為黃色
+              console.log(`儲存格 ${id}:${header} 更新為：${field.value}`);
+            }
           }
-        });
-        await context.sync();
-      });
+        } else {
+          console.log(`ID ${id} 找不到相對應的行`);
+        }
+      }
+      await context.sync();
     });
   } catch (error) {
     console.error("同步表格資料時發生錯誤：", error);
