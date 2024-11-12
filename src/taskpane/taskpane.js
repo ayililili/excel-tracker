@@ -130,7 +130,7 @@ async function syncTableWithApi() {
             const cell = sheet.getRange(`${col}${row}`);
             cell.values = [[field.value]];
             cell.format.fill.color = "yellow"; // 設置背景顏色為黃色
-            console.log(`儲存格 ${cell.address} 更新為：${field.value}`);
+            console.log(`儲存格 ${id}:${header} 更新為：${field.value}`);
           }
         });
       });
