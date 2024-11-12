@@ -117,7 +117,6 @@ async function syncTableWithApi() {
       const rowRange = sheet.getRange("B1:Z1");
       rowRange.load("values");
       await context.sync();
-      console.log(rowRange);
 
       // 逐行處理 API 資料
       workbookData.forEach((item) => {
@@ -129,15 +128,9 @@ async function syncTableWithApi() {
           const col = rowRange.values.findIndex((col) => col == header);
           if (row && col) {
             const cell = sheet.getRange(`${col}${row}`);
-            cell.load("values"); // 加載儲存格的值
-            await context.sync(); // 確保值已經同步
-            const currentValue = cell.values[0][0];
-            // 如果儲存格值與新值不同，將儲存格背景設置為黃色
-            if (currentValue !== field.value) {
-              cell.values = [[field.value]];
-              cell.format.fill.color = "yellow"; // 設置背景顏色為黃色
-              console.log(`儲存格 ${cell.address} 更新為：${field.value}`);
-            }
+            cell.values = [[field.value]];
+            cell.format.fill.color = "yellow"; // 設置背景顏色為黃色
+            console.log(`儲存格 ${cell.address} 更新為：${field.value}`);
           }
         });
       });
