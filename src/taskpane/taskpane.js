@@ -120,13 +120,13 @@ async function syncTableWithApi() {
       console.log(rowRange);
 
       // 逐行處理 API 資料
-      workbookData.forEach(async (item) => {
+      workbookData.forEach((item) => {
         const id = item.id;
         const row = colRange.values.findIndex((row) => row[0] == id) + 2; // 回傳行號（從 2 開始）
         item.items.forEach(async (field) => {
           // 根據編號和項目名稱找到儲存格並填充值
           const header = field.header;
-          const col = rowRange.findIndex((col) => col == header);
+          const col = rowRange.values.findIndex((col) => col == header);
           if (row && col) {
             const cell = sheet.getRange(`${col}${row}`);
             cell.load("values"); // 加載儲存格的值
