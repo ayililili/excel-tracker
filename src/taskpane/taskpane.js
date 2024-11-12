@@ -117,11 +117,10 @@ async function syncTableWithApi() {
       const rowRange = sheet.getRange("B1:Z1");
       rowRange.load("values");
       await context.sync();
-      console.log(colRange.values);
-      console.log(rowRange.values);
 
       // 逐行處理 API 資料
       workbookData.forEach(async (item) => {
+        console.log(item);
         const id = item.id;
         const row = colRange.values.findIndex((row) => row[0] === id) + 2; // 回傳行號（從 2 開始）
         console.log(row);
