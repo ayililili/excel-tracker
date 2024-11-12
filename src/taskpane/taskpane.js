@@ -112,6 +112,13 @@ async function syncTableWithApi() {
 
     await Excel.run(async (context) => {
       const sheet = context.workbook.worksheets.getActiveWorksheet();
+
+      // 1. 清除範圍內所有單元格的背景顏色
+      const clearRange = sheet.getRange("A2:Z1000"); // 清除範圍
+      clearRange.format.fill.clear(); // 移除底色
+      await context.sync();
+
+      // 2. 加載編號列 (A2:A1000) 和標題列 (B1:Z1) 的值
       const colRange = sheet.getRange("A2:A1000");
       colRange.load("values");
       const rowRange = sheet.getRange("B1:Z1");
