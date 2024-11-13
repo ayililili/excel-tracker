@@ -1,213 +1,109 @@
-/* global console, document, Excel, Office */
+import { ExcelService } from "../services/excel.service";
+import { ApiService } from "../services/api.service";
+import { ChangesStore } from "../stores/changes.store";
+import { CellChangeHandler } from "../handlers/cell-change.handler";
 
-// 用來儲存變更的儲存格紀錄，以編號作為索引
-let changes = {};
-let workbookName = "";
-
-// 當 Add-in 加載後啟動
-Office.onReady((info) => {
-  if (info.host === Office.HostType.Excel) {
-    document.getElementById("sideload-msg").style.display = "none";
-    document.getElementById("app-body").style.display = "flex";
-
-    // 獲取檔案名
-    getWorkbookName();
-
-    // 監聽儲存格變化
-    monitorCellChanges();
-
-    // 當用戶點擊 'run' 按鈕時發送 API 請求
-    document.getElementById("run").onclick = sendChangesToApi;
-
-    // 當用戶點擊 'sync' 按鈕時同步表格
-    document.getElementById("sync").onclick = syncTableWithApi;
+class TaskPane {
+  constructor() {
+    this.excelService = new ExcelService();
+    this.apiService = new ApiService();
+    this.changesStore = new ChangesStore();
+    this.cellChangeHandler = new CellChangeHandler(this.changesStore);
+    this.workbookName = "";
   }
-});
 
-// 獲取當前檔案名
-async function getWorkbookName() {
-  try {
-    await Excel.run(async (context) => {
-      const workbook = context.workbook;
-      workbook.load("name"); // Explicitly load the 'name' property
+  async initialize() {
+    if (Office.HostType.Excel) {
+      document.getElementById("sideload-msg").style.display = "none";
+      document.getElementById("app-body").style.display = "flex";
 
-      await context.sync();
-      workbookName = workbook.name;
-      console.log(`檔案名：${workbookName}`);
-    });
-  } catch (error) {
-    console.error("無法獲取檔案名：", error);
+      await this.setupWorkbook();
+      this.setupEventListeners();
+    }
   }
-}
 
-// 監聽儲存格變化
-async function monitorCellChanges() {
-  try {
-    await Excel.run(async (context) => {
-      const sheet = context.workbook.worksheets.getActiveWorksheet();
+  async setupWorkbook() {
+    this.workbookName = await this.excelService.getWorkbookName();
+    await this.monitorCellChanges();
+  }
 
-      // 監聽儲存格變化事件
-      sheet.onChanged.add(async (eventArgs) => {
-        console.log(eventArgs);
-        const changedCell = eventArgs.address;
-        const newValue = eventArgs.details.valueAfter;
+  setupEventListeners() {
+    document.getElementById("run").onclick = () => this.sendChangesToApi();
+    document.getElementById("sync").onclick = () => this.syncTableWithApi();
+  }
 
-        const [column, row] = changedCell.match(/[A-Z]+|\d+/g);
+  async monitorCellChanges() {
+    try {
+      await Excel.run(async (context) => {
+        const sheet = context.workbook.worksheets.getActiveWorksheet();
+        sheet.onChanged.add((eventArgs) => this.cellChangeHandler.handleCellChange(eventArgs, sheet));
+        await context.sync();
+      });
+    } catch (error) {
+      console.error("監聽儲存格變化錯誤：", error);
+    }
+  }
 
-        // 如果是第一排（編號列）或第一行（項目列），則不予記錄
-        if (parseInt(row, 10) === 1 || parseInt(column, 10) === 1) {
-          return;
-        }
+  async sendChangesToApi() {
+    try {
+      await this.apiService.sendChanges(this.workbookName, this.changesStore.getChanges());
+      this.changesStore.clear();
+      console.log("數據已成功上傳到 API");
+    } catch (error) {
+      console.error("錯誤：", error);
+    }
+  }
 
-        // 獲取編號列（第一列）的值
-        const idCell = `A${row}`; // 取得第一列的編號
-        const idRange = sheet.getRange(idCell);
-        idRange.load("values");
+  async syncTableWithApi() {
+    try {
+      const data = await this.apiService.fetchData();
+      const workbookData = data[this.workbookName];
 
-        // 獲取項目列（第一行）的值
-        const headerCell = `${column}1`; // 取得第一行的標題
-        const headerRange = sheet.getRange(headerCell);
-        headerRange.load("values");
+      if (!workbookData) {
+        console.log("沒有匹配的資料來自 API");
+        return;
+      }
 
+      await Excel.run(async (context) => {
+        const sheet = context.workbook.worksheets.getActiveWorksheet();
+
+        // Clear existing highlights
+        const clearRange = sheet.getRange("A2:Z1000");
+        clearRange.format.fill.clear();
+
+        // Load ranges
+        const colRange = sheet.getRange("A2:A1000");
+        const rowRange = sheet.getRange("B1:Z1");
+        colRange.load("values");
+        rowRange.load("values");
         await context.sync();
 
-        const idValue = idRange.values[0][0]; // 取得編號
-        const headerValue = headerRange.values[0][0]; // 取得項目名稱
+        // Update cells
+        for (const item of workbookData) {
+          const rowIndex = colRange.values.findIndex((row) => row[0] == item.id);
+          if (rowIndex === -1) continue;
 
-        // 確保編號在紀錄物件中
-        if (!changes[idValue]) {
-          changes[idValue] = {};
-        }
-
-        // 使用編號作為索引，並將項目名稱和值加入
-        changes[idValue][headerValue] = newValue;
-
-        console.log(`儲存格 ${changedCell}（編號: ${idValue}, 項目: ${headerValue}）改為：${newValue}`);
-      });
-
-      await context.sync();
-    });
-  } catch (error) {
-    console.error("監聽儲存格變化錯誤：", error);
-  }
-}
-
-// 當用戶點擊 'sync' 按鈕時，根據 API 數據同步表格
-async function syncTableWithApi() {
-  try {
-    const response = await fetch("http://localhost:3001/");
-    if (!response.ok) {
-      throw new Error("無法從 API 取得資料");
-    }
-
-    const data = await response.json();
-    console.log("從 API 讀取的資料：", data);
-
-    // 只處理當前工作簿名稱對應的資料
-    const workbookData = data["Project.xlsx"];
-    if (!workbookData) {
-      console.log("沒有匹配的資料來自 API");
-      return;
-    }
-
-    await Excel.run(async (context) => {
-      const sheet = context.workbook.worksheets.getActiveWorksheet();
-
-      // 1. 清除範圍內所有單元格的背景顏色
-      const clearRange = sheet.getRange("A2:Z1000"); // 清除範圍
-      clearRange.format.fill.clear(); // 移除底色
-      await context.sync();
-
-      // 2. 加載編號列 (A2:A1000) 和標題列 (B1:Z1) 的值
-      const colRange = sheet.getRange("A2:A1000");
-      colRange.load("values");
-      const rowRange = sheet.getRange("B1:Z1");
-      rowRange.load("values");
-      await context.sync();
-
-      // 使用 `for...of` 迴圈處理 API 資料
-      for (const item of workbookData) {
-        const id = item.id;
-        const rowIndex = colRange.values.findIndex((row) => row[0] == id);
-        const row = rowIndex !== -1 ? rowIndex + 2 : null; // 計算行號，若找不到則為 null
-
-        if (row) {
+          const row = rowIndex + 2;
           for (const field of item.items) {
-            const header = field.header;
-            const colIndex = rowRange.values[0].findIndex((col) => col == header);
-            const col = colIndex !== -1 ? String.fromCharCode(66 + colIndex) : null; // B 對應 66
+            const colIndex = rowRange.values[0].findIndex((col) => col == field.header);
+            if (colIndex === -1) continue;
 
-            if (col) {
-              const cell = sheet.getRange(`${col}${row}`);
-              cell.values = [[field.value]];
-              cell.format.fill.color = "yellow"; // 設置背景顏色為黃色
-              console.log(`儲存格 ${id}:${header} 更新為：${field.value}`);
-            }
+            const col = String.fromCharCode(66 + colIndex);
+            const cell = sheet.getRange(`${col}${row}`);
+            cell.values = [[field.value]];
+            cell.format.fill.color = "yellow";
           }
-        } else {
-          console.log(`ID ${id} 找不到相對應的行`);
         }
-      }
-      await context.sync();
-    });
-  } catch (error) {
-    console.error("同步表格資料時發生錯誤：", error);
-  }
-}
-
-// 根據編號查找行
-async function findRowById(colRange, id) {
-  const range = sheet.getRange("A2:A1000"); // 假設編號列在 A 列
-  range.load("values"); // 加載範圍值
-  await sheet.context.sync(); // 確保範圍的值已經同步
-  return colRange.values.findIndex((row) => row[0] === id) + 2; // 回傳行號（從 2 開始）
-}
-
-// 根據標題查找列
-async function findColumnByHeader(sheet, header) {
-  const range = sheet.getRange("1:1"); // 假設標題行在第 1 行
-  range.load("values"); // 加載標題行
-  await sheet.context.sync(); // 確保標題行的值已經同步
-  const headerRow = range.values[0];
-
-  const colIndex = headerRow.findIndex((colHeader) => colHeader === header);
-  return colIndex >= 0 ? String.fromCharCode(65 + colIndex) : null; // 返回列標識（如 A、B、C 等）
-}
-
-// 當用戶點擊 'run' 時，將儲存格紀錄和檔案名發送到 API
-async function sendChangesToApi() {
-  try {
-    const changeEntries = Object.entries(changes);
-    if (changeEntries.length > 0) {
-      // 將物件轉換成數組，以便於發送
-      const requestBody = {
-        id: workbookName,
-        data: changeEntries.map(([id, items]) => ({
-          id,
-          items: Object.entries(items).map(([header, value]) => ({ header, value })),
-        })),
-      };
-
-      // 使用 fetch 進行 POST 請求
-      const response = await fetch("http://localhost:3001/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
+        await context.sync();
       });
-
-      if (response.ok) {
-        console.log("數據已成功上傳到 API");
-        // 上傳後清空紀錄
-        changes = {};
-      } else {
-        console.error("上傳失敗，狀態碼：", response.status);
-      }
-    } else {
-      console.log("沒有儲存格變更記錄");
+    } catch (error) {
+      console.error("同步表格資料時發生錯誤：", error);
     }
-  } catch (error) {
-    console.error("錯誤：", error);
   }
 }
+
+// Initialize when Office is ready
+Office.onReady(() => {
+  const taskPane = new TaskPane();
+  taskPane.initialize();
+});
