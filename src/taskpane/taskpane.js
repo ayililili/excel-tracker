@@ -14,7 +14,6 @@ class TaskPane {
 
   async initialize() {
     if (Office.HostType.Excel) {
-      document.getElementById("sideload-msg").style.display = "none";
       document.getElementById("app-body").style.display = "flex";
 
       await this.setupWorkbook();
