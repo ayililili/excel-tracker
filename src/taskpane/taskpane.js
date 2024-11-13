@@ -45,7 +45,7 @@ class TaskPane {
 
   async sendChangesToApi() {
     try {
-      await this.apiService.sendChanges(this.workbookName, this.changesStore.getChanges());
+      await this.apiService.sendChanges("Project.xlsx", this.changesStore.getChanges());
       this.changesStore.clear();
       console.log("數據已成功上傳到 API");
     } catch (error) {
