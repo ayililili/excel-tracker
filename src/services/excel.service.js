@@ -1,4 +1,4 @@
-class ExcelService {
+export class ExcelService {
   async getWorkbookName() {
     try {
       await Excel.run(async (context) => {
