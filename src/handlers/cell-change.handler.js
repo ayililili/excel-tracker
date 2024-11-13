@@ -9,7 +9,7 @@ export class CellChangeHandler {
     const [column, row] = changedCell.match(/[A-Z]+|\d+/g);
 
     if (parseInt(row, 10) === 1 || parseInt(column, 10) === 1) {
-      return 1;
+      return;
     }
 
     const idCell = `A${row}`;
