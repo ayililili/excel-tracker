@@ -45,7 +45,7 @@ class TaskPane {
 
   async sendChangesToApi() {
     try {
-      await this.apiService.sendChanges("Project.xlsx", this.changesStore.getChanges());
+      await this.apiService.sendChanges(this.workbookName, this.changesStore.getChanges());
       this.changesStore.clear();
       console.log("數據已成功上傳到 API");
     } catch (error) {
@@ -56,7 +56,7 @@ class TaskPane {
   async syncTableWithApi() {
     try {
       const data = await this.apiService.fetchData();
-      const workbookData = data[this.workbookName];
+      const workbookData = data["Project.xlsx"];
 
       if (!workbookData) {
         console.log("沒有匹配的資料來自 API");
