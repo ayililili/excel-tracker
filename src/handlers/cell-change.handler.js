@@ -1,4 +1,4 @@
-class CellChangeHandler {
+export class CellChangeHandler {
   constructor(changesStore) {
     this.changesStore = changesStore;
   }

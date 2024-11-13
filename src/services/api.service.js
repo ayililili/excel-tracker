@@ -1,4 +1,4 @@
-class ApiService {
+export class ApiService {
   constructor(baseUrl = "http://localhost:3001") {
     this.baseUrl = baseUrl;
   }

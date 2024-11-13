@@ -1,4 +1,4 @@
-class ChangesStore {
+export class ChangesStore {
   constructor() {
     this.changes = {};
   }
