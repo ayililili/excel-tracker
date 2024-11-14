@@ -5,7 +5,6 @@ export class CellChangeHandler {
 
   async handleCellChange(eventArgs, sheet) {
     const changes = eventArgs.details.valueChanges;
-    console.log(eventArgs);
     if (!changes || changes.length === 0) {
       return;
     }

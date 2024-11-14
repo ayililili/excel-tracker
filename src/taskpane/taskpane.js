@@ -1,8 +1,3 @@
-import { ExcelService } from "../services/excel.service";
-import { ApiService } from "../services/api.service";
-import { ChangesStore } from "../stores/changes.store";
-import { CellChangeHandler } from "../handlers/cell-change.handler";
-
 class TaskPane {
   constructor() {
     this.excelService = new ExcelService();
@@ -15,7 +10,6 @@ class TaskPane {
   async initialize() {
     if (Office.HostType.Excel) {
       document.getElementById("app-body").style.display = "flex";
-
       await this.setupWorkbook();
       this.setupEventListeners();
     }
@@ -23,7 +17,7 @@ class TaskPane {
 
   async setupWorkbook() {
     this.workbookName = await this.excelService.getWorkbookName();
-    await this.monitorCellChanges();
+    await this.excelService.captureSnapshot(); // 捕獲初始快照
   }
 
   setupEventListeners() {
@@ -31,20 +25,21 @@ class TaskPane {
     document.getElementById("sync").onclick = () => this.syncTableWithApi();
   }
 
-  async monitorCellChanges() {
+  async checkForChanges() {
     try {
-      await Excel.run(async (context) => {
-        const sheet = context.workbook.worksheets.getActiveWorksheet();
-        sheet.onChanged.add((eventArgs) => this.cellChangeHandler.handleCellChange(eventArgs, sheet));
-        await context.sync();
-      });
+      const changes = await this.excelService.compareWithSnapshot();
+      if (changes) {
+        this.changesStore.setChanges(changes);
+        console.log("變更已記錄:", changes);
+      }
     } catch (error) {
-      console.error("監聽儲存格變化錯誤：", error);
+      console.error("檢查變更時發生錯誤：", error);
     }
   }
 
   async sendChangesToApi() {
     try {
+      await this.checkForChanges(); // 檢查變更
       await this.apiService.sendChanges(this.workbookName, this.changesStore.getChanges());
       this.changesStore.clear();
       console.log("數據已成功上傳到 API");
@@ -57,27 +52,21 @@ class TaskPane {
     try {
       const data = await this.apiService.fetchData();
       const workbookData = data["Project.xlsx"];
-
       if (!workbookData) {
         console.log("沒有匹配的資料來自 API");
         return;
       }
-
       await Excel.run(async (context) => {
         const sheet = context.workbook.worksheets.getActiveWorksheet();
-
-        // Clear existing highlights
         const clearRange = sheet.getRange("A2:Z1000");
         clearRange.format.fill.clear();
 
-        // Load ranges
         const colRange = sheet.getRange("A2:A1000");
         const rowRange = sheet.getRange("B1:Z1");
         colRange.load("values");
         rowRange.load("values");
         await context.sync();
 
-        // Update cells
         for (const item of workbookData) {
           const rowIndex = colRange.values.findIndex((row) => row[0] == item.id);
           if (rowIndex === -1) continue;
