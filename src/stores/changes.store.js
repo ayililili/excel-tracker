@@ -28,6 +28,16 @@ export class ChangesStore {
     this.changes.summary = summary;
   }
 
+  // 一次性設置所有變更
+  setChanges(newChanges) {
+    this.changes = {
+      cellChanges: newChanges.cellChanges || [],
+      formulaChanges: newChanges.formulaChanges || [],
+      structuralChanges: newChanges.structuralChanges || {},
+      summary: newChanges.summary || {},
+    };
+  }
+
   // 返回所有變更
   getChanges() {
     return this.changes;
