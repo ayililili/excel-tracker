@@ -1,14 +1,12 @@
 import { ExcelService } from "../services/excel.service";
 import { ApiService } from "../services/api.service";
 import { ChangesStore } from "../stores/changes.store";
-import { CellChangeHandler } from "../handlers/cell-change.handler";
 
 class TaskPane {
   constructor() {
     this.excelService = new ExcelService();
     this.apiService = new ApiService();
     this.changesStore = new ChangesStore();
-    this.cellChangeHandler = new CellChangeHandler(this.changesStore);
     this.workbookName = "";
   }
 
@@ -26,8 +24,8 @@ class TaskPane {
   }
 
   setupEventListeners() {
-    document.getElementById("run").onclick = () => this.sendChangesToApi();
-    document.getElementById("sync").onclick = () => this.syncTableWithApi();
+    document.getElementById("push").onclick = () => this.sendChangesToApi();
+    document.getElementById("pull").onclick = () => this.syncTableWithApi();
   }
 
   async checkForChanges() {

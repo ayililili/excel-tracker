@@ -1,20 +1,45 @@
 export class ChangesStore {
   constructor() {
-    this.changes = {};
+    this.changes = {
+      cellChanges: [],
+      formulaChanges: [],
+      structuralChanges: {},
+      summary: {},
+    };
   }
 
-  addChange(id, header, value) {
-    if (!this.changes[id]) {
-      this.changes[id] = {};
-    }
-    this.changes[id][header] = value;
+  // 增加儲存格變化
+  addCellChange(change) {
+    this.changes.cellChanges.push(change);
   }
 
+  // 增加公式變化
+  addFormulaChange(change) {
+    this.changes.formulaChanges.push(change);
+  }
+
+  // 設定結構變化
+  setStructuralChanges(structuralChanges) {
+    this.changes.structuralChanges = structuralChanges;
+  }
+
+  // 設定摘要
+  setSummary(summary) {
+    this.changes.summary = summary;
+  }
+
+  // 返回所有變更
   getChanges() {
     return this.changes;
   }
 
+  // 清空所有變更
   clear() {
-    this.changes = {};
+    this.changes = {
+      cellChanges: [],
+      formulaChanges: [],
+      structuralChanges: {},
+      summary: {},
+    };
   }
 }
