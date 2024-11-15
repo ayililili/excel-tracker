@@ -7,7 +7,6 @@ export class ExcelService {
     this.serialCounter = 1;
   }
 
-  // 判斷文件類型
   async determineDocumentType() {
     const fileName = await this.getWorkbookName();
 
@@ -17,7 +16,6 @@ export class ExcelService {
       this.documentType = 2;
     } else if (fileName.match(/^採購BOM表單_.*_.*/)) {
       this.documentType = 3;
-      // 解析部門名稱和專案號
       const matches = fileName.match(/^採購BOM表單_(.*)_(.*)/);
       if (matches) {
         this.departmentName = matches[1];
@@ -34,7 +32,6 @@ export class ExcelService {
     };
   }
 
-  // 生成唯一序號
   generateUniqueId() {
     const prefix = `${this.departmentName}_${this.projectNumber}_`;
     const id = `${prefix}${String(this.serialCounter).padStart(4, "0")}`;
@@ -42,14 +39,12 @@ export class ExcelService {
     return id;
   }
 
-  // 驗證序號格式
   validateId(id) {
     if (!this.departmentName || !this.projectNumber) return true;
     const pattern = new RegExp(`^${this.departmentName}_${this.projectNumber}_\\d{4}$`);
     return pattern.test(id);
   }
 
-  // 取得需要追蹤的欄位
   _getTrackingColumns() {
     switch (this.documentType) {
       case 1:
@@ -63,7 +58,6 @@ export class ExcelService {
     }
   }
 
-  // 捕獲工作表快照
   async captureSnapshot() {
     try {
       await Excel.run(async (context) => {
@@ -88,14 +82,14 @@ export class ExcelService {
             if (hasData) {
               id = this.generateUniqueId();
               // 更新Excel中的ID
-              const cell = worksheet.getCell(row, 0);
+              const cell = worksheet.getRange(`A${row + 1}`);
               cell.values = [[id]];
             }
           }
 
           // 驗證ID格式
           if (id && this.documentType === 3 && !this.validateId(id)) {
-            const range = worksheet.getRow(row);
+            const range = worksheet.getRange(`${row + 1}:${row + 1}`);
             range.format.fill.color = "red";
             continue;
           }
@@ -125,7 +119,6 @@ export class ExcelService {
     }
   }
 
-  // 比較當前狀態與快照
   async compareWithSnapshot() {
     try {
       const changes = {};
@@ -138,11 +131,9 @@ export class ExcelService {
 
         const trackingColumns = this._getTrackingColumns();
 
-        // 遍歷所有行
         for (let row = 1; row < usedRange.rowCount; row++) {
           let id = usedRange.values[row][0];
 
-          // 處理空白ID的情況
           if (!id && this.documentType === 3) {
             const hasData = trackingColumns
               .slice(1)
@@ -150,14 +141,13 @@ export class ExcelService {
 
             if (hasData) {
               id = this.generateUniqueId();
-              const cell = worksheet.getCell(row, 0);
+              const cell = worksheet.getRange(`A${row + 1}`);
               cell.values = [[id]];
             }
           }
 
-          // 驗證ID格式
           if (id && this.documentType === 3 && !this.validateId(id)) {
-            const range = worksheet.getRow(row);
+            const range = worksheet.getRange(`${row + 1}:${row + 1}`);
             range.format.fill.color = "red";
             continue;
           }
@@ -168,7 +158,6 @@ export class ExcelService {
               currentValues[col] = usedRange.values[row][this._columnToIndex(col)] || "";
             });
 
-            // 檢查變更
             if (this.currentSnapshot[id]) {
               const hasChanges = trackingColumns.some(
                 (col) => this.currentSnapshot[id].values[col] !== currentValues[col]
@@ -181,7 +170,6 @@ export class ExcelService {
                 };
               }
             } else {
-              // 新增的記錄
               changes[id] = {
                 values: currentValues,
                 timestamp: new Date().toISOString(),
@@ -200,12 +188,10 @@ export class ExcelService {
     }
   }
 
-  // 輔助方法：將欄位名稱轉換為索引
   _columnToIndex(column) {
     return column.charCodeAt(0) - "A".charCodeAt(0);
   }
 
-  // 產生變更報告
   generateChangeReport(changes) {
     const report = [];
     report.push("=== Excel 工作表變更報告 ===");
