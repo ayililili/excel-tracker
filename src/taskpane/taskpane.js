@@ -13,7 +13,7 @@ class TaskPane {
 
   async initialize() {
     if (Office.context.host === Office.HostType.Excel) {
-      document.getElementById("app-body").style.display = "flex";
+      // document.getElementById("app-body").style.display = "flex";
       await this.setupWorkbook();
       this.setupEventListeners();
       this.updateUIState();
@@ -96,11 +96,6 @@ class TaskPane {
     // 插入到適當位置
     const buttonContainer = document.getElementById("button-container") || document.getElementById("app-body");
     buttonContainer.appendChild(updateFilenameBtn);
-
-    // 設置文件變更監聽
-    Office.context.document.addHandlerAsync(Office.EventType.DocumentSelectionChanged, async () => {
-      await this.handleDocumentChange();
-    });
   }
 
   async handleFileNameChange() {
@@ -142,32 +137,6 @@ class TaskPane {
   setupEventListeners() {
     document.getElementById("push").onclick = () => this.sendChangesToApi();
     document.getElementById("pull").onclick = () => this.syncTableWithApi();
-
-    // 使用 SelectionChanged 事件來檢測可能的變更
-    Office.context.document.addHandlerAsync(
-      Office.EventType.DocumentSelectionChanged,
-      async () => {
-        await this.handleDocumentChange();
-      },
-      (result) => {
-        if (result.status === Office.AsyncResultStatus.Failed) {
-          console.error("設置文件變更監聽器失敗：", result.error);
-        }
-      }
-    );
-  }
-
-  async handleDocumentChange() {
-    // 使用延遲處理，避免過於頻繁的檢查
-    if (this.changeTimeout) {
-      clearTimeout(this.changeTimeout);
-    }
-
-    this.changeTimeout = setTimeout(async () => {
-      if (this.isValidDocumentType) {
-        await this.checkForChanges();
-      }
-    }, 1000);
   }
 
   async checkForChanges() {
