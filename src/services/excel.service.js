@@ -48,9 +48,9 @@ export class ExcelService {
   _getTrackingColumns() {
     switch (this.documentType) {
       case 1:
-        return ["F", "G"];
+        return ["D"];
       case 2:
-        return ["D", "E"];
+        return ["E"];
       case 3:
         return ["B", "C"];
       default:
