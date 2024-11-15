@@ -49,7 +49,7 @@ export class ExcelService {
     }
 
     // 如果其中之一缺失，則檢測是否符合一般的合法格式（例如 XXX_XXX_0000）
-    const generalPattern = /^[a-zA-Z0-9]+_[a-zA-Z0-9]+_\d{4}$/;
+    const generalPattern = /^.+_.+_\d{4}$/;
     return generalPattern.test(id);
   }
 
