@@ -88,7 +88,7 @@ export class ExcelService {
           }
 
           // 驗證ID格式
-          if (id && this.documentType === 3 && !this.validateId(id)) {
+          if (id && !this.validateId(id)) {
             const range = worksheet.getRange(`${row + 1}:${row + 1}`);
             range.format.fill.color = "red";
             continue;
@@ -146,7 +146,7 @@ export class ExcelService {
             }
           }
 
-          if (id && this.documentType === 3 && !this.validateId(id)) {
+          if (id && !this.validateId(id)) {
             const range = worksheet.getRange(`${row + 1}:${row + 1}`);
             range.format.fill.color = "red";
             continue;
