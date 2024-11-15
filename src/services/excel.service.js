@@ -75,9 +75,7 @@ export class ExcelService {
 
           // 處理空白ID的情況
           if (!id && this.documentType === 3) {
-            const hasData = trackingColumns
-              .slice(1)
-              .some((col) => usedRange.values[row][this._columnToIndex(col)] !== "");
+            const hasData = trackingColumns.some((col) => usedRange.values[row][this._columnToIndex(col)] !== "");
 
             if (hasData) {
               id = this.generateUniqueId();
@@ -135,9 +133,7 @@ export class ExcelService {
           let id = usedRange.values[row][0];
 
           if (!id && this.documentType === 3) {
-            const hasData = trackingColumns
-              .slice(1)
-              .some((col) => usedRange.values[row][this._columnToIndex(col)] !== "");
+            const hasData = trackingColumns.some((col) => usedRange.values[row][this._columnToIndex(col)] !== "");
 
             if (hasData) {
               id = this.generateUniqueId();
