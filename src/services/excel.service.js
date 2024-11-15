@@ -40,9 +40,17 @@ export class ExcelService {
   }
 
   validateId(id) {
-    if (!this.departmentName || !this.projectNumber) return true;
-    const pattern = new RegExp(`^${this.departmentName}_${this.projectNumber}_\\d{4}$`);
-    return pattern.test(id);
+    if (!id || typeof id !== "string") return false;
+
+    // 如果 departmentName 和 projectNumber 都存在，檢測完整格式
+    if (this.departmentName && this.projectNumber) {
+      const pattern = new RegExp(`^${this.departmentName}_${this.projectNumber}_\\d{4}$`);
+      return pattern.test(id);
+    }
+
+    // 如果其中之一缺失，則檢測是否符合一般的合法格式（例如 XXX_XXX_0000）
+    const generalPattern = /^[a-zA-Z0-9]+_[a-zA-Z0-9]+_\d{4}$/;
+    return generalPattern.test(id);
   }
 
   _getTrackingColumns() {
