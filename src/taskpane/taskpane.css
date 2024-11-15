@@ -99,11 +99,6 @@ b {
   font-size: 0.9rem;
 }
 
-button.disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
 #update-filename {
   width: 100%;
   margin-bottom: 1rem;

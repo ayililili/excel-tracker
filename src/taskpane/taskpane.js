@@ -15,7 +15,6 @@ class TaskPane {
     if (Office.context.host === Office.HostType.Excel) {
       await this.setupWorkbook();
       this.setupEventListeners();
-      this.updateUIState();
     }
   }
 
@@ -61,22 +60,6 @@ class TaskPane {
     }
   }
 
-  updateUIState() {
-    const pushBtn = document.getElementById("push");
-    const pullBtn = document.getElementById("pull");
-
-    // 更新按鈕狀態
-    [pushBtn, pullBtn].forEach((btn) => {
-      if (!this.isValidDocumentType) {
-        btn.disabled = true;
-        btn.classList.add("disabled");
-      } else {
-        btn.disabled = false;
-        btn.classList.remove("disabled");
-      }
-    });
-  }
-
   setupEventListeners() {
     // 基本功能按鈕
     document.getElementById("push").onclick = () => this.sendChangesToApi();
@@ -112,8 +95,6 @@ class TaskPane {
         await this.showNotification("新檔案名稱格式不符合要求，變動將不予紀錄", "warning");
         console.log("新檔案名稱類型無效");
       }
-
-      this.updateUIState();
     } catch (error) {
       console.error("處理檔名變更時發生錯誤：", error);
       await this.showNotification("處理檔名變更時發生錯誤", "error");
