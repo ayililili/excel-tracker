@@ -16,6 +16,7 @@ class TaskPane {
       document.getElementById("app-body").style.display = "flex";
       await this.setupWorkbook();
       this.setupEventListeners();
+      this.updateUIState();
     }
   }
 
@@ -30,53 +31,108 @@ class TaskPane {
         console.log("檔案類型有效，已捕獲初始快照");
       } else {
         this.isValidDocumentType = false;
-        await this.showNotification("檔案名稱格式不符合要求，變動將不予紀錄", "warning");
+        this.showInvalidFileTypeBanner();
         console.log("檔案類型無效");
       }
-
-      await this.setupFileNameChangeListener();
     } catch (error) {
       console.error("設置工作簿時發生錯誤：", error);
       await this.showNotification("設置工作簿時發生錯誤", "error");
     }
   }
 
-  async setupFileNameChangeListener() {
-    try {
-      await Excel.run(async (context) => {
-        const workbook = context.workbook;
-        workbook.load("name");
-        await context.sync();
+  showInvalidFileTypeBanner() {
+    // 創建或更新無效檔案類型的橫幅
+    let banner = document.getElementById("invalid-type-banner");
+    if (!banner) {
+      banner = document.createElement("div");
+      banner.id = "invalid-type-banner";
+      banner.className = "warning-banner";
 
-        // 使用 setInterval 定期檢查檔名變更
-        this.fileNameCheckInterval = setInterval(async () => {
-          const currentName = await this.excelService.getWorkbookName();
-          if (currentName !== this.workbookName) {
-            await this.handleFileNameChange();
-          }
-        }, 1000); // 每秒檢查一次
-      });
-    } catch (error) {
-      console.error("設置檔名變更監聽器時發生錯誤：", error);
-      await this.showNotification("設置檔名監聽失敗", "error");
+      const content = document.createElement("div");
+      content.innerHTML = `
+        <strong>⚠️ 檔案名稱格式不符合要求</strong>
+        <p>目前檔案: ${this.workbookName}</p>
+        <p>變動將不予紀錄，請確認檔案名稱格式是否正確。</p>
+      `;
+
+      banner.appendChild(content);
+      document.getElementById("app-body").insertBefore(banner, document.getElementById("app-body").firstChild);
+    } else {
+      banner.querySelector("p").textContent = `目前檔案: ${this.workbookName}`;
     }
+  }
+
+  updateUIState() {
+    const pushBtn = document.getElementById("push");
+    const pullBtn = document.getElementById("pull");
+
+    // 更新按鈕狀態
+    [pushBtn, pullBtn].forEach((btn) => {
+      if (!this.isValidDocumentType) {
+        btn.disabled = true;
+        btn.classList.add("disabled");
+      } else {
+        btn.disabled = false;
+        btn.classList.remove("disabled");
+      }
+    });
+  }
+
+  setupEventListeners() {
+    // 基本功能按鈕
+    document.getElementById("push").onclick = () => this.sendChangesToApi();
+    document.getElementById("pull").onclick = () => this.syncTableWithApi();
+
+    // 新增檔名更新按鈕
+    const updateFilenameBtn = document.createElement("button");
+    updateFilenameBtn.id = "update-filename";
+    updateFilenameBtn.className = "ms-Button";
+    updateFilenameBtn.innerHTML = `
+      <span class="ms-Button-icon"><i class="ms-Icon ms-Icon--Refresh"></i></span>
+      <span class="ms-Button-label">更新檔案名稱</span>
+    `;
+    updateFilenameBtn.onclick = () => this.handleFileNameChange();
+
+    // 插入到適當位置
+    const buttonContainer = document.getElementById("button-container") || document.getElementById("app-body");
+    buttonContainer.appendChild(updateFilenameBtn);
+
+    // 設置文件變更監聽
+    Office.context.document.addHandlerAsync(Office.EventType.DocumentSelectionChanged, async () => {
+      await this.handleDocumentChange();
+    });
   }
 
   async handleFileNameChange() {
     try {
       const { type } = await this.excelService.determineDocumentType();
-      this.workbookName = await this.excelService.getWorkbookName();
+      const newWorkbookName = await this.excelService.getWorkbookName();
+
+      // 檢查檔名是否真的有變更
+      if (newWorkbookName === this.workbookName) {
+        await this.showNotification("檔案名稱沒有變更", "info");
+        return;
+      }
+
+      this.workbookName = newWorkbookName;
 
       if (type >= 1 && type <= 3) {
         this.isValidDocumentType = true;
         await this.excelService.captureSnapshot();
-        await this.showNotification("檔案名稱已更新，已重新捕獲快照", "info");
+        await this.showNotification("檔案名稱已更新，已重新捕獲快照", "success");
         console.log("檔案名稱已更新，類型有效，已捕獲新快照");
+
+        // 移除警告橫幅（如果存在）
+        const banner = document.getElementById("invalid-type-banner");
+        if (banner) banner.remove();
       } else {
         this.isValidDocumentType = false;
+        this.showInvalidFileTypeBanner();
         await this.showNotification("新檔案名稱格式不符合要求，變動將不予紀錄", "warning");
         console.log("新檔案名稱類型無效");
       }
+
+      this.updateUIState();
     } catch (error) {
       console.error("處理檔名變更時發生錯誤：", error);
       await this.showNotification("處理檔名變更時發生錯誤", "error");
