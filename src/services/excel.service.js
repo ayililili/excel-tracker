@@ -16,7 +16,7 @@ export class ExcelService {
       this.documentType = 2;
     } else if (fileName.match(/^採購BOM表單_.*_.*/)) {
       this.documentType = 3;
-      const matches = fileName.match(/^採購BOM表單_(.*)_(.*).xlsx/);
+      const matches = fileName.match(/^採購BOM表單_(.*)_(.*)\.[^\.]+$/);
       if (matches) {
         this.departmentName = matches[1];
         this.projectNumber = matches[2];
