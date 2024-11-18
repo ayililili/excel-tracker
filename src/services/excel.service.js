@@ -1,3 +1,29 @@
+// 定義表單類型的常量
+const DOCUMENT_TYPES = {
+  PROCESSING: 1, // 加工
+  PURCHASE: 2, // 市購
+  DEPARTMENT: 3, // 部門
+};
+
+// 欄位映射配置
+const COLUMN_MAPPINGS = {
+  [DOCUMENT_TYPES.PROCESSING]: {
+    name: { column: "B", key: "name" },
+    num: { column: "C", key: "num" },
+    brand: { column: null, key: "brand" },
+  },
+  [DOCUMENT_TYPES.PURCHASE]: {
+    name: { column: "B", key: "name" },
+    num: { column: "D", key: "num" },
+    brand: { column: "C", key: "brand" },
+  },
+  [DOCUMENT_TYPES.DEPARTMENT]: {
+    name: { column: "B", key: "name" },
+    num: { column: "C", key: "num" },
+    brand: { column: "E", key: "brand" },
+  },
+};
+
 export class ExcelService {
   constructor() {
     this.workbookName = "";
@@ -318,4 +344,88 @@ export class ExcelService {
 
   //   return report.join("\n");
   // }
+  // 修改 _getTrackingColumns 方法
+
+  _getTrackingColumns() {
+    const mapping = COLUMN_MAPPINGS[this.documentType];
+    if (!mapping) return [];
+
+    // 返回所有非null的column值
+    return Object.values(mapping)
+      .filter((item) => item.column !== null)
+      .map((item) => item.column);
+  }
+
+  // 新增方法：將Excel數據轉換為資料庫格式
+  _convertToDbFormat(rowValues, columns) {
+    const mapping = COLUMN_MAPPINGS[this.documentType];
+    if (!mapping) return null;
+
+    const values = {};
+
+    // 遍歷映射配置，根據column位置獲取對應的值
+    Object.entries(mapping).forEach(([field, config]) => {
+      if (config.column) {
+        const columnIndex = this._columnToIndex(config.column);
+        values[config.key] = rowValues[columnIndex] || "";
+      }
+    });
+
+    return values;
+  }
+
+  // 修改 captureSnapshot 方法
+  async captureSnapshot() {
+    try {
+      const wasProtected = this.worksheetProtected;
+      if (wasProtected) {
+        await this.unprotectWorksheet();
+      }
+
+      await Excel.run(async (context) => {
+        const worksheet = context.workbook.worksheets.getActiveWorksheet();
+        const usedRange = worksheet.getUsedRange();
+        usedRange.load(["values", "rowCount"]);
+        await context.sync();
+
+        const trackingColumns = this._getTrackingColumns();
+        const snapshot = {};
+
+        // 跳過標題行，從第二行開始
+        for (let row = 1; row < usedRange.rowCount; row++) {
+          let id = usedRange.values[row][0]; // A欄位值
+
+          if (!id && this.documentType === DOCUMENT_TYPES.DEPARTMENT) {
+            const hasData = trackingColumns.some((col) => usedRange.values[row][this._columnToIndex(col)] !== "");
+
+            if (hasData) {
+              id = this.generateUniqueId();
+              const cell = worksheet.getRange(`A${row + 1}`);
+              cell.values = [[id]];
+            }
+          }
+
+          if (id) {
+            snapshot[id] = {
+              values: this._convertToDbFormat(usedRange.values[row]), // 使用新的轉換方法
+              timestamp: new Date().toISOString(),
+              isSync: false, // 新增同步狀態標記
+            };
+          }
+        }
+
+        await context.sync();
+        this.currentSnapshot = snapshot;
+      });
+
+      if (wasProtected) {
+        await this.protectWorksheet();
+      }
+
+      return this.currentSnapshot;
+    } catch (error) {
+      console.error("捕獲快照時發生錯誤:", error);
+      throw error;
+    }
+  }
 }
