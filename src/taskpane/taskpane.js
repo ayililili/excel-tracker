@@ -7,7 +7,6 @@ class TaskPane {
     this.excelService = new ExcelService();
     this.apiService = new ApiService();
     this.changesStore = new ChangesStore();
-    this.workbookName = "";
     this.isValidDocumentType = false;
   }
 
@@ -21,7 +20,6 @@ class TaskPane {
   async setupWorkbook() {
     try {
       const { type } = await this.excelService.determineDocumentType();
-      this.workbookName = await this.excelService.getWorkbookName();
 
       if (type >= 1 && type <= 3) {
         this.isValidDocumentType = true;
@@ -48,15 +46,15 @@ class TaskPane {
 
       const content = document.createElement("div");
       content.innerHTML = `
-        <strong>⚠️ 檔案名稱格式不符合要求</strong>
-        <p>目前檔案: ${this.workbookName}</p>
-        <p>變動將不予紀錄，請確認檔案名稱格式是否正確。</p>
-      `;
+      <strong>⚠️ 檔案名稱格式不符合要求</strong>
+      <p>目前檔案: ${this.excelService.workbookName}</p>
+      <p>變動將不予紀錄，請確認檔案名稱格式是否正確。</p>
+    `;
 
       banner.appendChild(content);
       document.getElementById("app-body").insertBefore(banner, document.getElementById("app-body").firstChild);
     } else {
-      banner.querySelector("p").textContent = `目前檔案: ${this.workbookName}`;
+      banner.querySelector("p").textContent = `目前檔案: ${this.excelService.workbookName}`;
     }
   }
 
@@ -73,12 +71,10 @@ class TaskPane {
       const newWorkbookName = await this.excelService.getWorkbookName();
 
       // 檢查檔名是否真的有變更
-      if (newWorkbookName === this.workbookName) {
+      if (newWorkbookName === this.excelService.workbookName) {
         await this.showNotification("檔案名稱沒有變更", "info");
         return;
       }
-
-      this.workbookName = newWorkbookName;
 
       if (type >= 1 && type <= 3) {
         this.isValidDocumentType = true;
@@ -136,7 +132,7 @@ class TaskPane {
     try {
       const changes = await this.checkForChanges();
       if (changes) {
-        await this.apiService.sendChanges(this.workbookName, changes);
+        await this.apiService.sendChanges(this.excelService.workbookName, changes);
         this.changesStore.clear();
         await this.showNotification("數據已成功上傳", "success");
         console.log("數據已成功上傳到 API");
@@ -158,7 +154,7 @@ class TaskPane {
 
     try {
       const data = await this.apiService.fetchData();
-      const workbookData = data[this.workbookName];
+      const workbookData = data[this.excelService.workbookName];
 
       if (!workbookData) {
         await this.showNotification("沒有可同步的資料", "info");

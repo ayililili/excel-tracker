@@ -1,11 +1,12 @@
 export class ExcelService {
   constructor() {
+    this.workbookName = "";
+    this.worksheetProtected = false;
     this.currentSnapshot = null;
     this.documentType = null;
     this.departmentName = null;
     this.projectNumber = null;
     this.serialCounter = 1;
-    this.worksheetProtected = false;
   }
 
   async determineDocumentType() {
@@ -22,14 +23,8 @@ export class ExcelService {
         this.departmentName = matches[1];
         this.projectNumber = matches[2];
       }
-      // 如果是類型3，啟用工作表保護
-      await this.protectWorksheet();
     } else {
       this.documentType = 4;
-      // 如果不是類型3，確保解除保護
-      if (this.worksheetProtected) {
-        await this.unprotectWorksheet();
-      }
     }
 
     return {
@@ -37,6 +32,40 @@ export class ExcelService {
       departmentName: this.departmentName,
       projectNumber: this.projectNumber,
     };
+  }
+
+  async getWorkbookName() {
+    try {
+      let workbookName;
+      await Excel.run(async (context) => {
+        const workbook = context.workbook;
+        workbook.load("name");
+        await context.sync();
+        workbookName = workbook.name;
+      });
+      this.workbookName = workbookName;
+      return workbookName;
+    } catch (error) {
+      console.error("無法獲取檔案名：", error);
+      throw error;
+    }
+  }
+
+  async checkProtectionStatus() {
+    try {
+      let isProtected = false;
+      await Excel.run(async (context) => {
+        const worksheet = context.workbook.worksheets.getActiveWorksheet();
+        worksheet.load("protection/protected");
+        await context.sync();
+        isProtected = worksheet.protection.protected;
+      });
+      this.worksheetProtected = isProtected;
+      return isProtected;
+    } catch (error) {
+      console.error("檢查工作表保護狀態時發生錯誤:", error);
+      throw error;
+    }
   }
 
   // 新增：保護工作表的方法
@@ -289,20 +318,4 @@ export class ExcelService {
 
   //   return report.join("\n");
   // }
-
-  async getWorkbookName() {
-    try {
-      let workbookName;
-      await Excel.run(async (context) => {
-        const workbook = context.workbook;
-        workbook.load("name");
-        await context.sync();
-        workbookName = workbook.name;
-      });
-      return workbookName;
-    } catch (error) {
-      console.error("無法獲取檔案名：", error);
-      throw error;
-    }
-  }
 }
