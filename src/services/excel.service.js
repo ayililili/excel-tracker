@@ -24,9 +24,10 @@ export class ExcelService {
         this.departmentName = matches[1];
         this.projectNumber = matches[2];
       }
-      // if (!wasProtected) {
-      //   this.protectWorksheet();
-      // }
+      if (!wasProtected) {
+        console.log("hi");
+        // this.protectWorksheet();
+      }
     } else {
       this.documentType = 4;
     }
