@@ -193,7 +193,6 @@ export class ExcelService {
               values: {},
               timestamp: new Date().toISOString(),
             };
-            console.log("hi");
             // 記錄追蹤欄位的值
             trackingColumns.forEach((col) => {
               const value = usedRange.values[row][this._columnToIndex(col)];
@@ -201,7 +200,7 @@ export class ExcelService {
             });
           }
         }
-
+        console.log("hi");
         await context.sync();
         this.currentSnapshot = snapshot;
       });
