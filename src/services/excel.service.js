@@ -291,6 +291,7 @@ export class ExcelService {
   // }
 
   async getWorkbookName() {
+    console.log("1");
     try {
       let workbookName;
       await Excel.run(async (context) => {
@@ -299,6 +300,7 @@ export class ExcelService {
         await context.sync();
         workbookName = workbook.name;
       });
+      console.log(workbookName);
       return workbookName;
     } catch (error) {
       console.error("無法獲取檔案名：", error);
