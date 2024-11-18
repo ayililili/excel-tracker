@@ -74,8 +74,6 @@ export class ExcelService {
 
   // 新增：保護工作表的方法
   async protectWorksheet() {
-    if (this.documentType !== 3) return;
-
     try {
       await Excel.run(async (context) => {
         const worksheet = context.workbook.worksheets.getActiveWorksheet();
