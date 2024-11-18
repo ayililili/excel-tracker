@@ -89,6 +89,11 @@ class TaskPane {
         // 移除警告橫幅（如果存在）
         const banner = document.getElementById("invalid-type-banner");
         if (banner) banner.remove();
+
+        // 如果是類型3，提醒用戶工作表已被保護
+        if (type === 3) {
+          await this.showNotification("工作表已啟用保護，僅允許必要的編輯操作", "info");
+        }
       } else {
         this.isValidDocumentType = false;
         this.showInvalidFileTypeBanner();
