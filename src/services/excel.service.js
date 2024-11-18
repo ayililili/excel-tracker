@@ -5,6 +5,7 @@ export class ExcelService {
     this.departmentName = null;
     this.projectNumber = null;
     this.serialCounter = 1;
+    this.worksheetProtected = false;
   }
 
   async determineDocumentType() {
