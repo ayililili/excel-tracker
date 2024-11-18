@@ -200,11 +200,11 @@ export class ExcelService {
             });
           }
         }
-        console.log("hi");
+
         await context.sync();
         this.currentSnapshot = snapshot;
       });
-
+      console.log("hi");
       // 如果之前是保護狀態，重新啟用保護
       if (wasProtected) {
         await this.protectWorksheet();
