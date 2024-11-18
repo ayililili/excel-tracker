@@ -9,52 +9,34 @@ export class ExcelService {
   }
 
   async determineDocumentType() {
-    const wasProtected = this.worksheetProtected;
-    try {
-      // if (wasProtected) {
-      //   await this.unprotectWorksheet();
-      // }
-      const fileName = await this.getWorkbookName();
+    const fileName = await this.getWorkbookName();
 
-      if (fileName.startsWith("加工件採購")) {
-        this.documentType = 1;
-      } else if (fileName.startsWith("市購件請購")) {
-        this.documentType = 2;
-      } else if (fileName.match(/^採購BOM表單_.*_.*/)) {
-        this.documentType = 3;
-        const matches = fileName.match(/^採購BOM表單_(.*)_(.*)\.[^\.]+$/);
-        if (matches) {
-          this.departmentName = matches[1];
-          this.projectNumber = matches[2];
-        }
-      } else {
-        this.documentType = 4;
+    if (fileName.startsWith("加工件採購")) {
+      this.documentType = 1;
+    } else if (fileName.startsWith("市購件請購")) {
+      this.documentType = 2;
+    } else if (fileName.match(/^採購BOM表單_.*_.*/)) {
+      this.documentType = 3;
+      const matches = fileName.match(/^採購BOM表單_(.*)_(.*)\.[^\.]+$/);
+      if (matches) {
+        this.departmentName = matches[1];
+        this.projectNumber = matches[2];
       }
-      // 如果新的文件類型是3，確保啟用保護
-      if (this.documentType === 3) {
-        await this.protectWorksheet();
-      } else if (wasProtected) {
-        // 如果之前是保護狀態但新類型不是3，解除保護
-        this.worksheetProtected = false;
+      // 如果是類型3，啟用工作表保護
+      await this.protectWorksheet();
+    } else {
+      this.documentType = 4;
+      // 如果不是類型3，確保解除保護
+      if (this.worksheetProtected) {
+        await this.unprotectWorksheet();
       }
-
-      return {
-        type: this.documentType,
-        departmentName: this.departmentName,
-        projectNumber: this.projectNumber,
-      };
-    } catch (error) {
-      console.error("判斷文件類型時發生錯誤：", error);
-      // 如果過程中出錯，嘗試恢復原始保護狀態
-      if (wasProtected) {
-        try {
-          await this.protectWorksheet();
-        } catch (protectError) {
-          console.error("恢復工作表保護時發生錯誤：", protectError);
-        }
-      }
-      throw error;
     }
+
+    return {
+      type: this.documentType,
+      departmentName: this.departmentName,
+      projectNumber: this.projectNumber,
+    };
   }
 
   // 新增：保護工作表的方法
@@ -309,12 +291,7 @@ export class ExcelService {
   // }
 
   async getWorkbookName() {
-    const wasProtected = this.worksheetProtected;
     try {
-      if (wasProtected) {
-        await this.unprotectWorksheet();
-      }
-
       let workbookName;
       await Excel.run(async (context) => {
         const workbook = context.workbook;
@@ -322,22 +299,9 @@ export class ExcelService {
         await context.sync();
         workbookName = workbook.name;
       });
-
-      if (wasProtected) {
-        await this.protectWorksheet();
-      }
-
       return workbookName;
     } catch (error) {
       console.error("無法獲取檔案名：", error);
-      // 如果過程中出錯，嘗試恢復保護狀態
-      if (wasProtected) {
-        try {
-          await this.protectWorksheet();
-        } catch (protectError) {
-          console.error("恢復工作表保護時發生錯誤：", protectError);
-        }
-      }
       throw error;
     }
   }
