@@ -68,13 +68,6 @@ class TaskPane {
   async handleFileNameChange() {
     try {
       const { type } = await this.excelService.determineDocumentType();
-      const newWorkbookName = await this.excelService.getWorkbookName();
-
-      // 檢查檔名是否真的有變更
-      if (newWorkbookName === this.excelService.workbookName) {
-        await this.showNotification("檔案名稱沒有變更", "info");
-        return;
-      }
 
       if (type >= 1 && type <= 3) {
         this.isValidDocumentType = true;
