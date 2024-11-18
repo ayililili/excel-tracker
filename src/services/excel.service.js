@@ -202,7 +202,6 @@ export class ExcelService {
         }
 
         await context.sync();
-        console.log("hi");
         this.currentSnapshot = snapshot;
       });
 
