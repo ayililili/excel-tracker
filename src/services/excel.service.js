@@ -25,7 +25,6 @@ export class ExcelService {
         this.projectNumber = matches[2];
       }
       if (!wasProtected) {
-        console.log("hi");
         await this.protectWorksheet();
       }
     } else {
