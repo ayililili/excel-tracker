@@ -62,18 +62,18 @@ class TaskPane {
     // 基本功能按鈕
     document.getElementById("push").onclick = () => this.sendChangesToApi();
     document.getElementById("pull").onclick = () => this.syncTableWithApi();
-    document.getElementById("restart").onclick = () => this.handleFileNameChange();
+    document.getElementById("restart").onclick = () => this.restartWorkbook();
   }
 
-  async handleFileNameChange() {
+  async restartWorkbook() {
     try {
       const { type } = await this.excelService.determineDocumentType();
 
       if (type >= 1 && type <= 3) {
         this.isValidDocumentType = true;
         await this.excelService.captureSnapshot();
-        await this.showNotification("檔案名稱已更新，已重新捕獲快照", "success");
-        console.log("檔案名稱已更新，類型有效，已捕獲新快照");
+        await this.showNotification("已重新捕獲快照", "success");
+        console.log("類型有效，已捕獲新快照");
 
         // 移除警告橫幅（如果存在）
         const banner = document.getElementById("invalid-type-banner");
@@ -86,12 +86,12 @@ class TaskPane {
       } else {
         this.isValidDocumentType = false;
         this.showInvalidFileTypeBanner();
-        await this.showNotification("新檔案名稱格式不符合要求，變動將不予紀錄", "warning");
-        console.log("新檔案名稱類型無效");
+        await this.showNotification("檔案名稱格式不符合要求，變動將不予紀錄", "warning");
+        console.log("檔案名稱類型無效");
       }
     } catch (error) {
-      console.error("處理檔名變更時發生錯誤：", error);
-      await this.showNotification("處理檔名變更時發生錯誤", "error");
+      console.error("重啟時發生錯誤：", error);
+      await this.showNotification("重啟時發生錯誤", "error");
     }
   }
 
