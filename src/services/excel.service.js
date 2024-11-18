@@ -11,6 +11,7 @@ export class ExcelService {
 
   async determineDocumentType() {
     const fileName = await this.getWorkbookName();
+    const wasProtected = await this.checkProtectionStatus();
 
     if (fileName.startsWith("加工件採購")) {
       this.documentType = 1;
@@ -22,6 +23,9 @@ export class ExcelService {
       if (matches) {
         this.departmentName = matches[1];
         this.projectNumber = matches[2];
+        if (!wasProtected) {
+          this.protectWorksheet();
+        }
       }
     } else {
       this.documentType = 4;
