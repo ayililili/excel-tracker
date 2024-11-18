@@ -72,8 +72,8 @@ class TaskPane {
       if (type >= 1 && type <= 3) {
         this.isValidDocumentType = true;
         await this.excelService.captureSnapshot();
-        await this.showNotification("已重新捕獲快照", "success");
-        console.log("類型有效，已捕獲新快照");
+        await this.showNotification("檔案類型有效，已重新捕獲快照", "success");
+        console.log("檔案類型有效，已捕獲新快照");
 
         // 移除警告橫幅（如果存在）
         const banner = document.getElementById("invalid-type-banner");

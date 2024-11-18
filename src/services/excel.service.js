@@ -161,6 +161,7 @@ export class ExcelService {
 
         const trackingColumns = this._getTrackingColumns();
         const snapshot = {};
+        console.log("hi");
 
         // 跳過標題行，從第二行開始
         for (let row = 1; row < usedRange.rowCount; row++) {
