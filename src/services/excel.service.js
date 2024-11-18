@@ -21,6 +21,8 @@ export class ExcelService {
         this.departmentName = matches[1];
         this.projectNumber = matches[2];
       }
+      // 如果是類型3，立即啟用工作表保護
+      await this.protectWorksheet();
     } else {
       this.documentType = 4;
     }
@@ -30,6 +32,46 @@ export class ExcelService {
       departmentName: this.departmentName,
       projectNumber: this.projectNumber,
     };
+  }
+
+  // 新增：保護工作表的方法
+  async protectWorksheet() {
+    if (this.documentType !== 3) return;
+
+    try {
+      await Excel.run(async (context) => {
+        const worksheet = context.workbook.worksheets.getActiveWorksheet();
+        worksheet.protection.protect({
+          allowInsertRows: false,
+          allowDeleteRows: false,
+          allowFormatCells: false,
+          allowSort: false,
+          allowAutoFilter: false,
+        });
+        await context.sync();
+        this.worksheetProtected = true;
+      });
+    } catch (error) {
+      console.error("保護工作表時發生錯誤:", error);
+      throw error;
+    }
+  }
+
+  // 新增：解除工作表保護的方法
+  async unprotectWorksheet() {
+    if (this.documentType !== 3) return;
+
+    try {
+      await Excel.run(async (context) => {
+        const worksheet = context.workbook.worksheets.getActiveWorksheet();
+        worksheet.protection.unprotect();
+        await context.sync();
+        this.worksheetProtected = false;
+      });
+    } catch (error) {
+      console.error("解除工作表保護時發生錯誤:", error);
+      throw error;
+    }
   }
 
   generateUniqueId() {
@@ -68,6 +110,11 @@ export class ExcelService {
 
   async captureSnapshot() {
     try {
+      const wasProtected = this.worksheetProtected;
+      if (wasProtected) {
+        await this.unprotectWorksheet();
+      }
+
       await Excel.run(async (context) => {
         const worksheet = context.workbook.worksheets.getActiveWorksheet();
         const usedRange = worksheet.getUsedRange();
@@ -122,6 +169,11 @@ export class ExcelService {
         this.currentSnapshot = snapshot;
       });
 
+      // 如果之前是保護狀態，重新啟用保護
+      if (wasProtected) {
+        await this.protectWorksheet();
+      }
+
       return this.currentSnapshot;
     } catch (error) {
       console.error("捕獲快照時發生錯誤:", error);
@@ -131,6 +183,11 @@ export class ExcelService {
 
   async compareWithSnapshot() {
     try {
+      const wasProtected = this.worksheetProtected;
+      if (wasProtected) {
+        await this.unprotectWorksheet();
+      }
+
       const changes = {};
 
       await Excel.run(async (context) => {
@@ -188,6 +245,10 @@ export class ExcelService {
 
         await context.sync();
       });
+
+      if (wasProtected) {
+        await this.protectWorksheet();
+      }
 
       return changes;
     } catch (error) {
