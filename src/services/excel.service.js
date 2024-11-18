@@ -94,10 +94,17 @@ export class ExcelService {
           }
 
           // 驗證ID格式
+          const range = worksheet.getRange(`${row + 1}:${row + 1}`);
+          const currentColor = range.format.fill.color;
+
           if (id && !this.validateId(id)) {
-            const range = worksheet.getRange(`${row + 1}:${row + 1}`);
+            // 如果 ID 不合法，將底色設為紅色
             range.format.fill.color = "red";
-            continue;
+          } else if (id && this.validateId(id)) {
+            // 如果 ID 合法，且當前底色是紅色，清除底色
+            if (currentColor === "red") {
+              range.format.fill.clear(); // 清除填充色
+            }
           }
 
           if (id) {
