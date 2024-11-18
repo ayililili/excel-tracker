@@ -187,8 +187,6 @@ export class ExcelService {
             // 如果 ID 合法，清除底色
             range.format.fill.clear(); // 清除填充色
           }
-          await context.sync();
-          console.log("hi");
 
           if (id) {
             snapshot[id] = {
