@@ -177,7 +177,6 @@ export class ExcelService {
               cell.values = [[id]];
             }
           }
-          console.log("hi");
           // 驗證ID格式
           const range = worksheet.getRange(`${row + 1}:${row + 1}`);
 
@@ -194,7 +193,7 @@ export class ExcelService {
               values: {},
               timestamp: new Date().toISOString(),
             };
-
+            console.log("hi");
             // 記錄追蹤欄位的值
             trackingColumns.forEach((col) => {
               const value = usedRange.values[row][this._columnToIndex(col)];
