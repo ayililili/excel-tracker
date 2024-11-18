@@ -26,7 +26,7 @@ export class ExcelService {
       }
       if (!wasProtected) {
         console.log("hi");
-        // this.protectWorksheet();
+        await this.protectWorksheet();
       }
     } else {
       this.documentType = 4;
