@@ -120,7 +120,7 @@ class TaskPane {
       if (changes) {
         const groupChanges = this.groupChangesByType(changes);
         if (Object.keys(groupChanges[1]).length > 0) {
-          await this.apiService.sendChanges("", "123");
+          await this.apiService.sendChanges(1, groupChanges[1]);
         }
         if (Object.keys(groupChanges[2]).length > 0) {
           await this.apiService.sendChanges(2, groupChanges[2]);
