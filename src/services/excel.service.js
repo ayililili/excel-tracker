@@ -257,7 +257,7 @@ export class ExcelService {
   }
 
   // 更新：檢查必填欄位並標記顏色
-  _validateAndMarkRequiredFields(worksheet, row, values, allColumns) {
+  async _validateAndMarkRequiredFields(worksheet, row, values, allColumns) {
     const columnHeaders = this._getColumnHeaders();
     const requiredFields = columnHeaders.required || [];
     let isValid = true;
