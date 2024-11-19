@@ -65,36 +65,6 @@ class TaskPane {
     document.getElementById("restart").onclick = () => this.restartWorkbook();
   }
 
-  async restartWorkbook() {
-    try {
-      const { type } = await this.excelService.determineDocumentType();
-
-      if (type >= 1 && type <= 3) {
-        this.isValidDocumentType = true;
-        await this.excelService.captureSnapshot();
-        await this.showNotification("檔案類型有效，已重新捕獲快照", "success");
-        console.log("檔案類型有效，已捕獲新快照");
-
-        // 移除警告橫幅（如果存在）
-        const banner = document.getElementById("invalid-type-banner");
-        if (banner) banner.remove();
-
-        // 如果是類型3，提醒用戶工作表已被保護
-        if (type === 3) {
-          await this.showNotification("工作表已啟用保護，僅允許必要的編輯操作", "info");
-        }
-      } else {
-        this.isValidDocumentType = false;
-        this.showInvalidFileTypeBanner();
-        await this.showNotification("檔案名稱格式不符合要求，變動將不予紀錄", "warning");
-        console.log("檔案名稱類型無效");
-      }
-    } catch (error) {
-      console.error("重啟時發生錯誤：", error);
-      await this.showNotification("重啟時發生錯誤", "error");
-    }
-  }
-
   async checkForChanges() {
     if (!this.isValidDocumentType) {
       console.log("檔案類型無效，不進行變更檢查");
@@ -194,6 +164,36 @@ class TaskPane {
     } catch (error) {
       console.error("同步表格資料時發生錯誤：", error);
       await this.showNotification("同步資料時發生錯誤", "error");
+    }
+  }
+
+  async restartWorkbook() {
+    try {
+      const { type } = await this.excelService.determineDocumentType();
+
+      if (type >= 1 && type <= 3) {
+        this.isValidDocumentType = true;
+        await this.excelService.captureSnapshot();
+        await this.showNotification("檔案類型有效，已重新捕獲快照", "success");
+        console.log("檔案類型有效，已捕獲新快照");
+
+        // 移除警告橫幅（如果存在）
+        const banner = document.getElementById("invalid-type-banner");
+        if (banner) banner.remove();
+
+        // 如果是類型3，提醒用戶工作表已被保護
+        if (type === 3) {
+          await this.showNotification("工作表已啟用保護，僅允許必要的編輯操作", "info");
+        }
+      } else {
+        this.isValidDocumentType = false;
+        this.showInvalidFileTypeBanner();
+        await this.showNotification("檔案名稱格式不符合要求，變動將不予紀錄", "warning");
+        console.log("檔案名稱類型無效");
+      }
+    } catch (error) {
+      console.error("重啟時發生錯誤：", error);
+      await this.showNotification("重啟時發生錯誤", "error");
     }
   }
 

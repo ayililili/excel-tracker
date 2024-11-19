@@ -178,6 +178,25 @@ export class ExcelService {
     return id;
   }
 
+  async updateHeaderCell() {
+    try {
+      await Excel.run(async (context) => {
+        const worksheet = context.workbook.worksheets.getActiveWorksheet();
+        const headerCell = worksheet.getRange("A1");
+
+        // 設置新的 ID 值
+        const newHeaderValue = `ID(${String(this.serialCounter).padStart(4, "0")})`;
+        headerCell.values = [[newHeaderValue]];
+
+        await context.sync();
+        console.log(`A1 單元格更新為: ${newHeaderValue}`);
+      });
+    } catch (error) {
+      console.error("更新 A1 單元格值時發生錯誤:", error);
+      throw error;
+    }
+  }
+
   validateId(id) {
     if (!id || typeof id !== "string") return false;
 
@@ -270,6 +289,7 @@ export class ExcelService {
           }
         }
 
+        await this.updateHeaderCell();
         await context.sync();
         this.currentSnapshot = snapshot;
       });
@@ -376,6 +396,7 @@ export class ExcelService {
           }
         }
 
+        await this.updateHeaderCell();
         await context.sync();
       });
 
