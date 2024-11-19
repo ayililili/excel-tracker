@@ -178,20 +178,28 @@ export class ExcelService {
 
       await Excel.run(async (context) => {
         const worksheet = context.workbook.worksheets.getActiveWorksheet();
-        const usedRange = worksheet.getUsedRange();
-        usedRange.load(["values", "rowCount"]);
+        const trackingColumns = this._getTrackingColumns();
+
+        // 只讀取需要的欄位範圍
+        const ranges = trackingColumns.map((col) => worksheet.getRange(`${col}:${col}`));
+        const idRange = worksheet.getRange("A:A");
+
+        // 一次性載入所有需要的資料
+        ranges.forEach((range) => range.load("values"));
+        idRange.load(["values", "rowCount"]);
         await context.sync();
 
-        const trackingColumns = this._getTrackingColumns();
         const snapshot = {};
 
         // 跳過標題行，從第二行開始
-        for (let row = 1; row < usedRange.rowCount; row++) {
-          let id = usedRange.values[row][0]; // A欄位值
+        for (let row = 1; row < idRange.rowCount; row++) {
+          let id = idRange.values[row][0];
 
           // 處理空白ID的情況
           if (!id && this.documentType === 3) {
-            const hasData = trackingColumns.some((col) => usedRange.values[row][this._columnToIndex(col)] !== "");
+            const hasData = trackingColumns.some((col, index) => {
+              return ranges[index].values[row][0] !== "";
+            });
 
             if (hasData) {
               id = this.generateUniqueId();
@@ -200,15 +208,14 @@ export class ExcelService {
               cell.values = [[id]];
             }
           }
+
           // 驗證ID格式
-          const range = worksheet.getRange(`${row + 1}:${row + 1}`);
+          const rowRange = worksheet.getRange(`${row + 1}:${row + 1}`);
 
           if (id && !this.validateId(id)) {
-            // 如果 ID 不合法，將底色設為紅色
-            range.format.fill.color = "red";
+            rowRange.format.fill.color = "red";
           } else if (id && this.validateId(id)) {
-            // 如果 ID 合法，清除底色
-            range.format.fill.clear(); // 清除填充色
+            rowRange.format.fill.clear();
           }
 
           if (id) {
@@ -216,9 +223,10 @@ export class ExcelService {
               values: {},
               timestamp: new Date().toISOString(),
             };
+
             // 記錄追蹤欄位的值
-            trackingColumns.forEach((col) => {
-              const value = usedRange.values[row][this._columnToIndex(col)];
+            trackingColumns.forEach((col, index) => {
+              const value = ranges[index].values[row][0];
               snapshot[id].values[col] = value || "";
             });
           }
