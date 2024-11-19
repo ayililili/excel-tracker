@@ -264,7 +264,7 @@ export class ExcelService {
 
       await Excel.run(async (context) => {
         const worksheet = context.workbook.worksheets.getActiveWorksheet();
-        const columnHeaders = this._getColumnHeaders();
+        const columnHeaders = this._getColumnHeaders().modifiable;
         const idColumn = this._getIdColumn(); // 動態獲取 ID 欄位
 
         // 首先獲取最後一行
@@ -353,7 +353,7 @@ export class ExcelService {
 
       await Excel.run(async (context) => {
         const worksheet = context.workbook.worksheets.getActiveWorksheet();
-        const columnHeaders = this._getColumnHeaders();
+        const columnHeaders = this._getColumnHeaders().modifiable;
         const idColumn = this._getIdColumn(); // 動態獲取 ID 欄位
 
         // 首先獲取最後一行
