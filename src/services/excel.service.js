@@ -10,6 +10,8 @@ const COLUMN_MAPPINGS = {
   [DOCUMENT_TYPES.PROCESSING]: {
     name: "C",
     type: "B",
+    brand: "D",
+    num: "E",
   },
   [DOCUMENT_TYPES.PURCHASE]: {
     name: "C",
@@ -19,7 +21,6 @@ const COLUMN_MAPPINGS = {
   [DOCUMENT_TYPES.DEPARTMENT]: {
     name: "C",
     type: "B",
-    brand: "D",
   },
 };
 
@@ -233,7 +234,6 @@ export class ExcelService {
             snapshot[id] = {
               values: {},
               timestamp: new Date().toISOString(),
-              isSync: false,
             };
 
             // 使用欄位名稱作為key來儲存值
@@ -336,6 +336,7 @@ export class ExcelService {
                 changes[id] = {
                   values: currentValues,
                   timestamp: new Date().toISOString(),
+                  isSync: false,
                 };
               }
             } else {
@@ -343,6 +344,7 @@ export class ExcelService {
               changes[id] = {
                 values: currentValues,
                 timestamp: new Date().toISOString(),
+                isSync: false,
               };
             }
           }
