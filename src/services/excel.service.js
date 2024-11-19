@@ -156,17 +156,22 @@ export class ExcelService {
     return generalPattern.test(id);
   }
 
+  // 取得需要追蹤的欄位
   _getTrackingColumns() {
-    switch (this.documentType) {
-      case 1:
-        return ["D"];
-      case 2:
-        return ["E"];
-      case 3:
-        return ["B", "C"];
-      default:
-        return [];
+    const mapping = COLUMN_MAPPINGS[this.documentType];
+    if (!mapping) {
+      throw new Error(`未知的文件類型: ${this.documentType}`);
     }
+    return Object.values(mapping);
+  }
+
+  // 取得欄位名稱對應
+  _getColumnHeaders() {
+    const mapping = COLUMN_MAPPINGS[this.documentType];
+    if (!mapping) {
+      throw new Error(`未知的文件類型: ${this.documentType}`);
+    }
+    return Object.index(mapping);
   }
 
   async captureSnapshot() {
@@ -178,7 +183,7 @@ export class ExcelService {
 
       await Excel.run(async (context) => {
         const worksheet = context.workbook.worksheets.getActiveWorksheet();
-        const trackingColumns = this._getTrackingColumns();
+        const columnHeaders = this._getColumnHeaders();
 
         // 首先獲取最後一行
         const lastRow = worksheet.getUsedRange().getLastRow();
@@ -186,7 +191,7 @@ export class ExcelService {
         await context.sync();
 
         // 構建要讀取的範圍
-        const rangeAddresses = trackingColumns.map((col) => `${col}1:${col}${lastRow.rowIndex + 1}`);
+        const rangeAddresses = Object.values(columnHeaders).map((col) => `${col}1:${col}${lastRow.rowIndex + 1}`);
         rangeAddresses.push(`A1:A${lastRow.rowIndex + 1}`); // ID列
 
         // 讀取所有需要的範圍
@@ -202,8 +207,8 @@ export class ExcelService {
           let id = idValues[row][0];
 
           // 處理空白ID的情況
-          if (!id && this.documentType === 3) {
-            const hasData = trackingColumns.some((_, index) => {
+          if (!id && this.documentType === DOCUMENT_TYPES.DEPARTMENT) {
+            const hasData = Object.values(columnHeaders).some((_, index) => {
               return ranges[index].values[row][0] !== "";
             });
 
@@ -228,13 +233,13 @@ export class ExcelService {
             snapshot[id] = {
               values: {},
               timestamp: new Date().toISOString(),
-              isSync: false, // 新增同步狀態標記
+              isSync: false,
             };
 
-            // 記錄追蹤欄位的值
-            trackingColumns.forEach((col, index) => {
+            // 使用欄位名稱作為key來儲存值
+            Object.entries(columnHeaders).forEach((key, index) => {
               const value = ranges[index].values[row][0];
-              snapshot[id].values[col] = value || "";
+              snapshot[id].values[key] = value || "";
             });
           }
         }
