@@ -256,22 +256,37 @@ export class ExcelService {
     return mapping.nonModifiable.id; // 返回 ID 對應的列名稱
   }
 
-  _validateRequiredFields(id, values) {
+  // 更新：檢查必填欄位並標記顏色
+  _validateAndMarkRequiredFields(worksheet, row, values, allColumns) {
     const columnHeaders = this._getColumnHeaders();
     const requiredFields = columnHeaders.required || [];
+    let isValid = true;
 
-    // 檢查每個必填欄位
-    const missingFields = requiredFields.filter((field) => {
+    // 檢查必填欄位
+    for (const field of requiredFields) {
       const value = values[field];
-      return value === undefined || value === null || value.toString().trim() === "";
-    });
+      const isEmpty = value === undefined || value === null || value.toString().trim() === "";
 
-    if (missingFields.length > 0) {
-      console.warn(`ID ${id} 缺少必填欄位: ${missingFields.join(", ")}`);
-      return false;
+      if (isEmpty) {
+        isValid = false;
+        // 獲取欄位對應的列號並標記為紅色
+        const column = allColumns[field];
+        if (column) {
+          const cell = worksheet.getRange(`${column}${row}`);
+          cell.format.fill.color = "#FFB6C0"; // 淺紅色
+        }
+      }
     }
 
-    return true;
+    // 標記整行的顏色
+    const rowRange = worksheet.getRange(`${row}:${row}`);
+    if (isValid && values.id && this.validateId(values.id)) {
+      rowRange.format.fill.color = "#90EE90"; // 淺綠色
+    } else {
+      rowRange.format.fill.clear(); // 清除整行的底色
+    }
+
+    return isValid;
   }
 
   async captureSnapshot() {
