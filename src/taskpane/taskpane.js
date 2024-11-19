@@ -119,14 +119,13 @@ class TaskPane {
       const changes = await this.excelService.compareWithSnapshot();
       if (changes) {
         const groupChanges = this.groupChangesByType(changes);
-        if (groupChanges[1] != []) {
-          console.log(groupChanges[1]);
-          await this.apiService.sendChanges(1, groupChanges[1]);
+        if (Object.keys(groupChanges[1]).length > 0) {
+          await this.apiService.sendChanges("", groupChanges[1]);
         }
-        if (groupChanges[2] != []) {
+        if (Object.keys(groupChanges[2]).length > 0) {
           await this.apiService.sendChanges(2, groupChanges[2]);
         }
-        if (groupChanges[3] != []) {
+        if (Object.keys(groupChanges[3]).length > 0) {
           await this.apiService.sendChanges(3, groupChanges[3]);
         }
         await this.showNotification("數據已成功上傳", "success");
