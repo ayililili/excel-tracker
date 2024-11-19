@@ -32,7 +32,7 @@ export class ExcelService {
     this.documentType = null;
     this.departmentName = null;
     this.projectNumber = null;
-    this.serialCounter = 1;
+    this.serialCounter = 0;
   }
 
   async determineDocumentType() {
@@ -50,6 +50,7 @@ export class ExcelService {
         this.departmentName = matches[1];
         this.projectNumber = matches[2];
       }
+      await this.initializeSerialCounterFromHeader();
       if (!wasProtected) {
         await this.protectWorksheet();
       }
@@ -136,6 +137,40 @@ export class ExcelService {
     }
   }
 
+  async initializeSerialCounterFromHeader() {
+    try {
+      await Excel.run(async (context) => {
+        const worksheet = context.workbook.worksheets.getActiveWorksheet();
+        const headerCell = worksheet.getRange("A1");
+        headerCell.load("values");
+        await context.sync();
+
+        const headerValue = headerCell.values[0][0];
+
+        // 匹配 ID(****) 格式，其中 **** 為四位數字
+        const match = headerValue?.match(/ID\((\d{4})\)/);
+
+        if (match) {
+          const serialNum = parseInt(match[1], 10);
+          if (!isNaN(serialNum)) {
+            this.serialCounter = serialNum; // 設置為下一個序號
+            console.log(`序號已初始化為: ${this.serialCounter}`);
+          } else {
+            console.warn("無法解析序號值");
+            this.serialCounter = 0; // 預設值
+          }
+        } else {
+          console.warn("A1儲存格格式不符合預期 (應為 'ID(####)' 格式)");
+          this.serialCounter = 0; // 預設值
+        }
+      });
+    } catch (error) {
+      console.error("從標題初始化序號計數器時發生錯誤:", error);
+      this.serialCounter = 0; // 發生錯誤時設置預設值
+      throw error;
+    }
+  }
+
   generateUniqueId() {
     const prefix = `${this.departmentName}_${this.projectNumber}_`;
     const id = `${prefix}${String(this.serialCounter).padStart(4, "0")}`;
@@ -155,15 +190,6 @@ export class ExcelService {
     // 如果其中之一缺失，則檢測是否符合一般的合法格式（例如 XXX_XXX_0000）
     const generalPattern = /^.+_.+_\d{4}$/;
     return generalPattern.test(id);
-  }
-
-  // 取得需要追蹤的欄位
-  _getTrackingColumns() {
-    const mapping = COLUMN_MAPPINGS[this.documentType];
-    if (!mapping) {
-      throw new Error(`未知的文件類型: ${this.documentType}`);
-    }
-    return Object.values(mapping);
   }
 
   // 取得欄位名稱對應
@@ -237,7 +263,7 @@ export class ExcelService {
             };
 
             // 使用欄位名稱作為key來儲存值
-            Object.entries(columnHeaders).forEach(([key, col], index) => {
+            Object.entries(columnHeaders).forEach(([key, _], index) => {
               const value = ranges[index].values[row][0];
               snapshot[id].values[key] = value || "";
             });
@@ -391,5 +417,4 @@ export class ExcelService {
 
   //   return report.join("\n");
   // }
-  // 修改 _getTrackingColumns 方法
 }
