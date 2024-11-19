@@ -130,7 +130,7 @@ export class ExcelService {
         const worksheet = context.workbook.worksheets.getActiveWorksheet();
         worksheet.protection.protect({
           allowInsertRows: true,
-          allowDeleteRows: false,
+          allowDeleteRows: true,
           allowFormatCells: true,
           allowSort: true,
           allowAutoFilter: true,
