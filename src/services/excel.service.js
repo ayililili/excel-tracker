@@ -105,11 +105,11 @@ export class ExcelService {
       await Excel.run(async (context) => {
         const worksheet = context.workbook.worksheets.getActiveWorksheet();
         worksheet.protection.protect({
-          allowInsertRows: true,
-          allowDeleteRows: true,
-          allowFormatCells: true,
-          allowSort: true,
-          allowAutoFilter: true,
+          allowInsertRows: false,
+          allowDeleteRows: false,
+          allowFormatCells: false,
+          allowSort: false,
+          allowAutoFilter: false,
         });
         await context.sync();
         this.worksheetProtected = true;
