@@ -65,25 +65,50 @@ class TaskPane {
     document.getElementById("restart").onclick = () => this.restartWorkbook();
   }
 
-  async checkForChanges() {
-    if (!this.isValidDocumentType) {
-      console.log("檔案類型無效，不進行變更檢查");
-      return null;
-    }
+  // async checkForChanges() {
+  //   if (!this.isValidDocumentType) {
+  //     console.log("檔案類型無效，不進行變更檢查");
+  //     return null;
+  //   }
 
-    try {
-      const changes = await this.excelService.compareWithSnapshot();
-      if (changes && Object.keys(changes).length > 0) {
-        this.changesStore.setChanges(changes);
-        console.log("變更已記錄:", changes);
-        return changes;
+  //   try {
+  //     const changes = await this.excelService.compareWithSnapshot();
+  //     if (changes && Object.keys(changes).length > 0) {
+  //       this.changesStore.setChanges(changes);
+  //       console.log("變更已記錄:", changes);
+  //       return changes;
+  //     }
+  //     return null;
+  //   } catch (error) {
+  //     console.error("檢查變更時發生錯誤：", error);
+  //     await this.showNotification("檢查變更時發生錯誤", "error");
+  //     throw error;
+  //   }
+  // }
+
+  groupChangesByType(changes) {
+    const groupedChanges = {
+      1: {}, // 加工件
+      2: {}, // 市購件
+      3: {}, // 檔案類型是1或2
+      4: {}, // 其餘
+    };
+
+    Object.entries(changes).forEach(([id, data]) => {
+      const type = data.values.type; // 假設 'type' 欄位是指定的分類依據
+
+      if (type === "1" || type === "2") {
+        groupedChanges[3][id] = data;
+      } else if (type === "市購件") {
+        groupedChanges[2][id] = data;
+      } else if (type === "加工件") {
+        groupedChanges[1][id] = data;
+      } else {
+        groupedChanges[4][id] = data;
       }
-      return null;
-    } catch (error) {
-      console.error("檢查變更時發生錯誤：", error);
-      await this.showNotification("檢查變更時發生錯誤", "error");
-      throw error;
-    }
+    });
+
+    return groupedChanges;
   }
 
   async sendChangesToApi() {
@@ -93,10 +118,18 @@ class TaskPane {
     }
 
     try {
-      const changes = await this.checkForChanges();
+      const changes = await this.excelService.compareWithSnapshot();
       if (changes) {
-        await this.apiService.sendChanges(this.excelService.workbookName, changes);
-        this.changesStore.clear();
+        const groupChanges = this.groupChangesByType(changes);
+        if (groupChanges[1] != []) {
+          await this.apiService.sendChanges(1, groupChanges[1]);
+        }
+        if (groupChanges[2] != []) {
+          await this.apiService.sendChanges(2, groupChanges[2]);
+        }
+        if (groupChanges[3] != []) {
+          await this.apiService.sendChanges(3, groupChanges[3]);
+        }
         await this.showNotification("數據已成功上傳", "success");
         console.log("數據已成功上傳到 API");
 

@@ -452,45 +452,6 @@ export class ExcelService {
     return column.charCodeAt(0) - "A".charCodeAt(0);
   }
 
-  groupChangesByType(changes) {
-    const groupedChanges = {
-      1: {}, // 加工件
-      2: {}, // 市購件
-      3: {}, // 檔案類型是1或2
-      4: {}, // 其餘
-    };
-
-    Object.entries(changes).forEach(([id, data]) => {
-      const type = data.values.type; // 假設 'type' 欄位是指定的分類依據
-
-      if (type === "1" || type === "2") {
-        groupedChanges[3][id] = data;
-      } else if (type === "市購件") {
-        groupedChanges[2][id] = data;
-      } else if (type === "加工件") {
-        groupedChanges[1][id] = data;
-      } else {
-        groupedChanges[4][id] = data;
-      }
-    });
-
-    return groupedChanges;
-  }
-
-  getGroupedChanges(type) {
-    if (!this.groupedChanges) {
-      console.error("請先執行 groupChangesByType 函式以初始化分組資料！");
-      return null;
-    }
-
-    if (!this.groupedChanges[type]) {
-      console.error(`分類 ${type} 不存在！`);
-      return null;
-    }
-
-    return this.groupedChanges[type];
-  }
-
   // generateChangeReport(changes) {
   //   const report = [];
   //   report.push("=== Excel 工作表變更報告 ===");
