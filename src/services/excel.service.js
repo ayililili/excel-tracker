@@ -180,24 +180,30 @@ export class ExcelService {
         const worksheet = context.workbook.worksheets.getActiveWorksheet();
         const trackingColumns = this._getTrackingColumns();
 
-        // 只讀取需要的欄位範圍
-        const ranges = trackingColumns.map((col) => worksheet.getRange(`${col}:${col}`));
-        const idRange = worksheet.getRange("A:A");
+        // 首先獲取最後一行
+        const lastRow = worksheet.getUsedRange().getLastRow();
+        lastRow.load("rowIndex");
+        await context.sync();
 
-        // 一次性載入所有需要的資料
-        ranges.forEach((range) => range.load("values"));
-        idRange.load(["values", "rowCount"]);
+        // 構建要讀取的範圍
+        const rangeAddresses = trackingColumns.map((col) => `${col}1:${col}${lastRow.rowIndex + 1}`);
+        rangeAddresses.push(`A1:A${lastRow.rowIndex + 1}`); // ID列
+
+        // 讀取所有需要的範圍
+        const ranges = rangeAddresses.map((address) => worksheet.getRange(address).load("values"));
+
         await context.sync();
 
         const snapshot = {};
+        const idValues = ranges[ranges.length - 1].values; // ID列的值
 
         // 跳過標題行，從第二行開始
-        for (let row = 1; row < idRange.rowCount; row++) {
-          let id = idRange.values[row][0];
+        for (let row = 1; row < idValues.length; row++) {
+          let id = idValues[row][0];
 
           // 處理空白ID的情況
           if (!id && this.documentType === 3) {
-            const hasData = trackingColumns.some((col, index) => {
+            const hasData = trackingColumns.some((_, index) => {
               return ranges[index].values[row][0] !== "";
             });
 
