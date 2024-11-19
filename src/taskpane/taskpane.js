@@ -149,7 +149,7 @@ class TaskPane {
 
       try {
         // 使用 fetchData 獲取API數據
-        const apiData = await this.apiService.fetchData(this.documentType);
+        const apiData = await this.apiService.fetchData(this.excelService.documentType);
 
         // 檢查獲取的數據是否有效
         if (!apiData || typeof apiData !== "object") {
