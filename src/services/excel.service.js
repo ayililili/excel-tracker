@@ -452,6 +452,80 @@ export class ExcelService {
     return column.charCodeAt(0) - "A".charCodeAt(0);
   }
 
+  async updateFromApiData(apiData) {
+    try {
+      const wasProtected = this.worksheetProtected;
+      if (wasProtected) {
+        await this.unprotectWorksheet();
+      }
+
+      await Excel.run(async (context) => {
+        const worksheet = context.workbook.worksheets.getActiveWorksheet();
+        const columnHeaders = this._getColumnHeaders();
+        const idColumn = this._getIdColumn();
+
+        // 獲取當前使用的範圍
+        const usedRange = worksheet.getUsedRange();
+        usedRange.load("rowCount");
+        await context.sync();
+
+        // 獲取所有ID的值
+        const idRange = worksheet.getRange(`${idColumn}2:${idColumn}${usedRange.rowCount}`);
+        idRange.load("values");
+        await context.sync();
+
+        // 處理每個API數據項
+        for (const [id, data] of Object.entries(apiData)) {
+          // 在現有數據中查找ID
+          const existingRowIndex = idRange.values.findIndex((row) => row[0] === id);
+
+          if (existingRowIndex !== -1) {
+            // 更新現有行
+            const actualRowIndex = existingRowIndex + 2; // 加2是因為索引從0開始且有標題行
+
+            // 更新可修改的欄位
+            for (const [field, value] of Object.entries(data.values)) {
+              const column = columnHeaders.modifiable[field] || columnHeaders.nonModifiable[field];
+              if (column) {
+                const cell = worksheet.getRange(`${column}${actualRowIndex}`);
+                cell.values = [[value]];
+              }
+            }
+          } else {
+            // 在最後一行後面添加新行
+            const newRowIndex = usedRange.rowCount + 1;
+
+            // 先設置ID
+            const idCell = worksheet.getRange(`${idColumn}${newRowIndex}`);
+            idCell.values = [[id]];
+
+            // 設置其他欄位的值
+            for (const [field, value] of Object.entries(data.values)) {
+              const column = columnHeaders.modifiable[field] || columnHeaders.nonModifiable[field];
+              if (column) {
+                const cell = worksheet.getRange(`${column}${newRowIndex}`);
+                cell.values = [[value]];
+              }
+            }
+          }
+        }
+
+        await context.sync();
+      });
+
+      // 如果之前是保護狀態，重新啟用保護
+      if (wasProtected) {
+        await this.protectWorksheet();
+      }
+
+      // 更新完成後重新捕獲快照
+      await this.captureSnapshot();
+    } catch (error) {
+      console.error("更新Excel數據時發生錯誤:", error);
+      throw error;
+    }
+  }
+
   // generateChangeReport(changes) {
   //   const report = [];
   //   report.push("=== Excel 工作表變更報告 ===");

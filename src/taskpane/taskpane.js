@@ -140,7 +140,9 @@ class TaskPane {
     }
   }
 
-  async syncTableWithApi() {}
+  async syncTableWithApi() {
+    
+  }
 
   async restartWorkbook() {
     try {
