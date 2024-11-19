@@ -18,7 +18,7 @@ export class ApiService {
     }
 
     const requestBody = {
-      changes,
+      data: changes,
     };
 
     const response = await fetch(`${this.baseUrl}/${type}`, {

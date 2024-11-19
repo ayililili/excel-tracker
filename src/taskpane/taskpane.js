@@ -120,6 +120,7 @@ class TaskPane {
       if (changes) {
         const groupChanges = this.groupChangesByType(changes);
         if (groupChanges[1] != []) {
+          console.log(groupChanges[1]);
           await this.apiService.sendChanges(1, groupChanges[1]);
         }
         if (groupChanges[2] != []) {
