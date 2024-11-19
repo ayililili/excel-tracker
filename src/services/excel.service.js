@@ -8,16 +8,43 @@ const DOCUMENT_TYPES = {
 // 欄位映射配置
 const COLUMN_MAPPINGS = {
   [DOCUMENT_TYPES.PROCESSING]: {
-    brand: "D",
-    num: "E",
+    modifiable: {
+      brand: "D",
+      num: "E",
+    },
+    nonModifiable: {
+      id: "A",
+      name: "C",
+      type: "B",
+      isRevoked: "F",
+      createdAt: "G",
+      modifyAt: "H",
+    },
   },
   [DOCUMENT_TYPES.PURCHASE]: {
-    num: "D",
+    modifiable: {
+      num: "D",
+    },
+    nonModifiable: {
+      id: "A",
+      name: "C",
+      type: "B",
+      isRevoked: "E",
+      createdAt: "F",
+      modifyAt: "G",
+    },
   },
   [DOCUMENT_TYPES.DEPARTMENT]: {
-    name: "C",
-    type: "B",
-    isRevoked: "F",
+    modifiable: {
+      name: "C",
+      type: "B",
+      isRevoked: "F",
+    },
+    nonModifiable: {
+      id: "A",
+      createdAt: "G",
+      modifyAt: "H",
+    },
   },
 };
 
