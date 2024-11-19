@@ -1,6 +1,5 @@
 import { ExcelService } from "../services/excel.service";
 import { ApiService } from "../services/api.service";
-import { ChangesStore } from "../stores/changes.store";
 
 class TaskPane {
   constructor() {
