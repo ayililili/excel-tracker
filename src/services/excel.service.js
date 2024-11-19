@@ -280,7 +280,6 @@ export class ExcelService {
         const ranges = rangeAddresses.map((address) => worksheet.getRange(address).load("values"));
 
         await context.sync();
-        console.log(ranges);
 
         const snapshot = {};
         const idValues = ranges[ranges.length - 1].values; // ID列的值
@@ -288,7 +287,6 @@ export class ExcelService {
         // 跳過標題行，從第二行開始
         for (let row = 0; row < idValues.length; row++) {
           let id = idValues[row][0];
-          console.log(id, row);
 
           // 處理空白ID的情況
           if (!id && this.documentType === DOCUMENT_TYPES.DEPARTMENT) {
@@ -364,7 +362,7 @@ export class ExcelService {
         await context.sync();
 
         // 構建要讀取的範圍
-        const rangeAddresses = Object.values(columnHeaders).map((col) => `${col}1:${col}${lastRow.rowIndex + 1}`);
+        const rangeAddresses = Object.values(columnHeaders).map((col) => `${col}2:${col}${lastRow.rowIndex + 1}`);
         rangeAddresses.push(`${idColumn}2:${idColumn}${lastRow.rowIndex + 1}`); // ID列
 
         // 讀取所有需要的範圍
@@ -375,7 +373,7 @@ export class ExcelService {
         const idValues = ranges[ranges.length - 1].values; // ID列的值
 
         // 跳過標題行，從第二行開始
-        for (let row = 1; row < idValues.length; row++) {
+        for (let row = 0; row < idValues.length; row++) {
           let id = idValues[row][0];
 
           // 處理空白ID的情況
