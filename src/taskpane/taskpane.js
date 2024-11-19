@@ -109,63 +109,7 @@ class TaskPane {
     }
   }
 
-  async syncTableWithApi() {
-    if (!this.isValidDocumentType) {
-      await this.showNotification("檔案類型無效，不進行資料同步", "warning");
-      return;
-    }
-
-    try {
-      const data = await this.apiService.fetchData();
-      const workbookData = data[this.excelService.workbookName];
-
-      if (!workbookData) {
-        await this.showNotification("沒有可同步的資料", "info");
-        return;
-      }
-
-      await Excel.run(async (context) => {
-        const sheet = context.workbook.worksheets.getActiveWorksheet();
-
-        // 清除格式
-        const clearRange = sheet.getRange("A2:Z1000");
-        clearRange.format.fill.clear();
-
-        // 載入範圍
-        const dataRange = sheet.getRange("A2:Z1000");
-        const headerRange = sheet.getRange("A1:Z1");
-        dataRange.load("values");
-        headerRange.load("values");
-        await context.sync();
-
-        // 更新資料
-        for (const item of workbookData) {
-          // 尋找對應的 ID 行
-          for (let row = 0; row < dataRange.values.length; row++) {
-            if (dataRange.values[row][0] === item.id) {
-              // 更新每個欄位
-              for (const field of item.items) {
-                const colIndex = headerRange.values[0].indexOf(field.header);
-                if (colIndex !== -1) {
-                  const range = sheet.getRange(row + 2, colIndex + 1);
-                  range.values = [[field.value]];
-                  range.format.fill.color = "yellow";
-                }
-              }
-              break;
-            }
-          }
-        }
-
-        await context.sync();
-        await this.excelService.captureSnapshot();
-        await this.showNotification("資料同步完成", "success");
-      });
-    } catch (error) {
-      console.error("同步表格資料時發生錯誤：", error);
-      await this.showNotification("同步資料時發生錯誤", "error");
-    }
-  }
+  async syncTableWithApi() {}
 
   async restartWorkbook() {
     try {

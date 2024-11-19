@@ -45,6 +45,7 @@ const COLUMN_MAPPINGS = {
       createdAt: "G",
       modifyAt: "H",
     },
+    required: ["type", "name"],
   },
 };
 
@@ -255,6 +256,24 @@ export class ExcelService {
     return mapping.nonModifiable.id; // 返回 ID 對應的列名稱
   }
 
+  _validateRequiredFields(id, values) {
+    const columnHeaders = this._getColumnHeaders();
+    const requiredFields = columnHeaders.required || [];
+
+    // 檢查每個必填欄位
+    const missingFields = requiredFields.filter((field) => {
+      const value = values[field];
+      return value === undefined || value === null || value.toString().trim() === "";
+    });
+
+    if (missingFields.length > 0) {
+      console.warn(`ID ${id} 缺少必填欄位: ${missingFields.join(", ")}`);
+      return false;
+    }
+
+    return true;
+  }
+
   async captureSnapshot() {
     try {
       const wasProtected = this.worksheetProtected;
@@ -408,27 +427,29 @@ export class ExcelService {
               const value = ranges[index].values[row][0];
               currentValues[key] = value || "";
             });
+            // 只在所有必填欄位都有值的情況下才記錄變更
+            if (this._validateRequiredFields(currentValues.id, currentValues)) {
+              // 比較與快照的差異
+              if (this.currentSnapshot[id]) {
+                const hasChanges = Object.keys(columnHeaders).some(
+                  (key) => this.currentSnapshot[id].values[key] !== currentValues[key]
+                );
 
-            // 比較與快照的差異
-            if (this.currentSnapshot[id]) {
-              const hasChanges = Object.keys(columnHeaders).some(
-                (key) => this.currentSnapshot[id].values[key] !== currentValues[key]
-              );
-
-              if (hasChanges) {
+                if (hasChanges) {
+                  changes[id] = {
+                    values: currentValues,
+                    timestamp: new Date().toISOString(),
+                    isSync: false,
+                  };
+                }
+              } else {
+                // 新增的記錄
                 changes[id] = {
                   values: currentValues,
                   timestamp: new Date().toISOString(),
                   isSync: false,
                 };
               }
-            } else {
-              // 新增的記錄
-              changes[id] = {
-                values: currentValues,
-                timestamp: new Date().toISOString(),
-                isSync: false,
-              };
             }
           }
         }
