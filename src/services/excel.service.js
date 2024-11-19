@@ -26,9 +26,9 @@ const COLUMN_MAPPINGS = {
       num: "D",
     },
     nonModifiable: {
-      id: "A",
+      id: "B",
       name: "C",
-      type: "B",
+      type: "A",
       isRevoked: "E",
       createdAt: "F",
       modifyAt: "G",
@@ -163,9 +163,10 @@ export class ExcelService {
 
   async initializeSerialCounterFromHeader() {
     try {
+      const idColumn = this._getIdColumn();
       await Excel.run(async (context) => {
         const worksheet = context.workbook.worksheets.getActiveWorksheet();
-        const headerCell = worksheet.getRange("A1");
+        const headerCell = worksheet.getRange(`${idColumn}1`);
         headerCell.load("values");
         await context.sync();
 
@@ -184,7 +185,7 @@ export class ExcelService {
             this.serialCounter = 0; // 預設值
           }
         } else {
-          console.warn("A1儲存格格式不符合預期 (應為 'ID(####)' 格式)");
+          console.warn(`${idColumn}1 儲存格格式不符合預期 (應為 'ID(####)' 格式)`);
           this.serialCounter = 0; // 預設值
         }
       });
@@ -204,19 +205,20 @@ export class ExcelService {
 
   async updateHeaderCell() {
     try {
+      const idColumn = this._getIdColumn(); // 獲取 ID 欄位
       await Excel.run(async (context) => {
         const worksheet = context.workbook.worksheets.getActiveWorksheet();
-        const headerCell = worksheet.getRange("A1");
+        const headerCell = worksheet.getRange(`${idColumn}1`);
 
         // 設置新的 ID 值
         const newHeaderValue = `ID(${String(this.serialCounter).padStart(4, "0")})`;
         headerCell.values = [[newHeaderValue]];
 
         await context.sync();
-        console.log(`A1 單元格更新為: ${newHeaderValue}`);
+        console.log(`${idColumn}1 單元格更新為: ${newHeaderValue}`);
       });
     } catch (error) {
-      console.error("更新 A1 單元格值時發生錯誤:", error);
+      console.error("更新 ID 表頭值時發生錯誤:", error);
       throw error;
     }
   }
@@ -244,6 +246,15 @@ export class ExcelService {
     return mapping;
   }
 
+  // 動態獲取 ID 的欄位
+  _getIdColumn() {
+    const mapping = COLUMN_MAPPINGS[this.documentType];
+    if (!mapping || !mapping.nonModifiable.id) {
+      throw new Error(`無法獲取 ID 欄位，未知的文件類型或配置: ${this.documentType}`);
+    }
+    return mapping.nonModifiable.id; // 返回 ID 對應的列名稱
+  }
+
   async captureSnapshot() {
     try {
       const wasProtected = this.worksheetProtected;
@@ -254,6 +265,7 @@ export class ExcelService {
       await Excel.run(async (context) => {
         const worksheet = context.workbook.worksheets.getActiveWorksheet();
         const columnHeaders = this._getColumnHeaders();
+        const idColumn = this._getIdColumn(); // 動態獲取 ID 欄位
 
         // 首先獲取最後一行
         const lastRow = worksheet.getUsedRange().getLastRow();
@@ -261,8 +273,8 @@ export class ExcelService {
         await context.sync();
 
         // 構建要讀取的範圍
-        const rangeAddresses = Object.values(columnHeaders).map((col) => `${col}1:${col}${lastRow.rowIndex + 1}`);
-        rangeAddresses.push(`A1:A${lastRow.rowIndex + 1}`); // ID列
+        const rangeAddresses = Object.values(columnHeaders).map((col) => `${col}2:${col}${lastRow.rowIndex + 1}`);
+        rangeAddresses.push(`${idColumn}2:${idColumn}${lastRow.rowIndex + 1}`); // ID列
 
         // 讀取所有需要的範圍
         const ranges = rangeAddresses.map((address) => worksheet.getRange(address).load("values"));
@@ -273,7 +285,7 @@ export class ExcelService {
         const idValues = ranges[ranges.length - 1].values; // ID列的值
 
         // 跳過標題行，從第二行開始
-        for (let row = 1; row < idValues.length; row++) {
+        for (let row = 0; row < idValues.length; row++) {
           let id = idValues[row][0];
 
           // 處理空白ID的情況
@@ -285,7 +297,7 @@ export class ExcelService {
             if (hasData) {
               id = this.generateUniqueId();
               // 更新Excel中的ID
-              const cell = worksheet.getRange(`A${row + 1}`);
+              const cell = worksheet.getRange(`${idColumn}${row + 1}`);
               cell.values = [[id]];
             }
           }
@@ -342,6 +354,7 @@ export class ExcelService {
       await Excel.run(async (context) => {
         const worksheet = context.workbook.worksheets.getActiveWorksheet();
         const columnHeaders = this._getColumnHeaders();
+        const idColumn = this._getIdColumn(); // 動態獲取 ID 欄位
 
         // 首先獲取最後一行
         const lastRow = worksheet.getUsedRange().getLastRow();
@@ -350,7 +363,7 @@ export class ExcelService {
 
         // 構建要讀取的範圍
         const rangeAddresses = Object.values(columnHeaders).map((col) => `${col}1:${col}${lastRow.rowIndex + 1}`);
-        rangeAddresses.push(`A1:A${lastRow.rowIndex + 1}`); // ID列
+        rangeAddresses.push(`${idColumn}2:${idColumn}${lastRow.rowIndex + 1}`); // ID列
 
         // 讀取所有需要的範圍
         const ranges = rangeAddresses.map((address) => worksheet.getRange(address).load("values"));
@@ -372,7 +385,7 @@ export class ExcelService {
             if (hasData) {
               id = this.generateUniqueId();
               // 更新Excel中的ID
-              const cell = worksheet.getRange(`A${row + 1}`);
+              const cell = worksheet.getRange(`${idColumn}${row + 1}`);
               cell.values = [[id]];
             }
           }
