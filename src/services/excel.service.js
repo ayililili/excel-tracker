@@ -8,18 +8,18 @@ const DOCUMENT_TYPES = {
 // 欄位映射配置
 const COLUMN_MAPPINGS = {
   [DOCUMENT_TYPES.PROCESSING]: {
-    name: "B",
-    num: "C",
+    name: "C",
+    type: "B",
   },
   [DOCUMENT_TYPES.PURCHASE]: {
-    name: "B",
+    name: "C",
+    type: "B",
     num: "D",
-    brand: "C",
   },
   [DOCUMENT_TYPES.DEPARTMENT]: {
-    name: "B",
-    num: "C",
-    brand: "E",
+    name: "C",
+    type: "B",
+    brand: "D",
   },
 };
 
