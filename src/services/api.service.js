@@ -3,8 +3,8 @@ export class ApiService {
     this.baseUrl = baseUrl;
   }
 
-  async fetchData() {
-    const response = await fetch(this.baseUrl);
+  async fetchData(type) {
+    const response = await fetch(`${this.baseUrl}/${type}`);
     if (!response.ok) {
       throw new Error("無法從 API 取得資料");
     }

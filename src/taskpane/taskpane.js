@@ -141,7 +141,40 @@ class TaskPane {
   }
 
   async syncTableWithApi() {
-    
+    try {
+      // 檢查文件類型是否有效
+      if (!this.documentType || this.documentType > 3) {
+        throw new Error("無效的文件類型");
+      }
+
+      try {
+        // 使用 fetchData 獲取API數據
+        const apiData = await this.fetchData(this.documentType);
+
+        // 檢查獲取的數據是否有效
+        if (!apiData || typeof apiData !== "object") {
+          throw new Error("獲取的數據格式無效");
+        }
+
+        // 更新Excel表格
+        await this.excelService.updateFromApiData(apiData);
+
+        console.log(`成功同步文件類型 ${this.documentType} 的數據`);
+        return {
+          success: true,
+          message: "數據同步成功",
+        };
+      } catch (apiError) {
+        console.error("API請求或數據處理錯誤:", apiError);
+        throw new Error(`API同步失敗: ${apiError.message}`);
+      }
+    } catch (error) {
+      console.error("同步過程發生錯誤:", error);
+      return {
+        success: false,
+        message: error.message,
+      };
+    }
   }
 
   async restartWorkbook() {
