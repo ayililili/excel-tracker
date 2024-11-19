@@ -228,6 +228,7 @@ export class ExcelService {
             snapshot[id] = {
               values: {},
               timestamp: new Date().toISOString(),
+              isSync: false, // 新增同步狀態標記
             };
 
             // 記錄追蹤欄位的值
