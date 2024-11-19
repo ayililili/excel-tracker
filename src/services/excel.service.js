@@ -238,7 +238,6 @@ export class ExcelService {
 
             // 使用欄位名稱作為key來儲存值
             Object.entries(columnHeaders).forEach(([key, col], index) => {
-              console.log(key, col, index);
               const value = ranges[index].values[row][0];
               snapshot[id].values[key] = value || "";
             });
@@ -272,40 +271,65 @@ export class ExcelService {
 
       await Excel.run(async (context) => {
         const worksheet = context.workbook.worksheets.getActiveWorksheet();
-        const usedRange = worksheet.getUsedRange();
-        usedRange.load(["values", "rowCount"]);
+        const columnHeaders = this._getColumnHeaders();
+
+        // 首先獲取最後一行
+        const lastRow = worksheet.getUsedRange().getLastRow();
+        lastRow.load("rowIndex");
         await context.sync();
 
-        const trackingColumns = this._getTrackingColumns();
+        // 構建要讀取的範圍
+        const rangeAddresses = Object.values(columnHeaders).map((col) => `${col}1:${col}${lastRow.rowIndex + 1}`);
+        rangeAddresses.push(`A1:A${lastRow.rowIndex + 1}`); // ID列
 
-        for (let row = 1; row < usedRange.rowCount; row++) {
-          let id = usedRange.values[row][0];
+        // 讀取所有需要的範圍
+        const ranges = rangeAddresses.map((address) => worksheet.getRange(address).load("values"));
 
-          if (!id && this.documentType === 3) {
-            const hasData = trackingColumns.some((col) => usedRange.values[row][this._columnToIndex(col)] !== "");
+        await context.sync();
+
+        const idValues = ranges[ranges.length - 1].values; // ID列的值
+
+        // 跳過標題行，從第二行開始
+        for (let row = 1; row < idValues.length; row++) {
+          let id = idValues[row][0];
+
+          // 處理空白ID的情況
+          if (!id && this.documentType === DOCUMENT_TYPES.DEPARTMENT) {
+            const hasData = Object.values(columnHeaders).some((_, index) => {
+              return ranges[index].values[row][0] !== "";
+            });
 
             if (hasData) {
               id = this.generateUniqueId();
+              // 更新Excel中的ID
               const cell = worksheet.getRange(`A${row + 1}`);
               cell.values = [[id]];
             }
           }
 
+          // 驗證ID格式
+          const rowRange = worksheet.getRange(`${row + 1}:${row + 1}`);
+
           if (id && !this.validateId(id)) {
-            const range = worksheet.getRange(`${row + 1}:${row + 1}`);
-            range.format.fill.color = "red";
+            rowRange.format.fill.color = "red";
             continue;
+          } else if (id && this.validateId(id)) {
+            rowRange.format.fill.clear();
           }
 
           if (id) {
             const currentValues = {};
-            trackingColumns.forEach((col) => {
-              currentValues[col] = usedRange.values[row][this._columnToIndex(col)] || "";
+
+            // 使用欄位名稱作為key來獲取值
+            Object.entries(columnHeaders).forEach(([key, col], index) => {
+              const value = ranges[index].values[row][0];
+              currentValues[key] = value || "";
             });
 
+            // 比較與快照的差異
             if (this.currentSnapshot[id]) {
-              const hasChanges = trackingColumns.some(
-                (col) => this.currentSnapshot[id].values[col] !== currentValues[col]
+              const hasChanges = Object.keys(columnHeaders).some(
+                (key) => this.currentSnapshot[id].values[key] !== currentValues[key]
               );
 
               if (hasChanges) {
@@ -315,6 +339,7 @@ export class ExcelService {
                 };
               }
             } else {
+              // 新增的記錄
               changes[id] = {
                 values: currentValues,
                 timestamp: new Date().toISOString(),
