@@ -8,19 +8,16 @@ const DOCUMENT_TYPES = {
 // 欄位映射配置
 const COLUMN_MAPPINGS = {
   [DOCUMENT_TYPES.PROCESSING]: {
-    name: "C",
-    type: "B",
     brand: "D",
     num: "E",
   },
   [DOCUMENT_TYPES.PURCHASE]: {
-    name: "C",
-    type: "B",
     num: "D",
   },
   [DOCUMENT_TYPES.DEPARTMENT]: {
     name: "C",
     type: "B",
+    isRevoked: "F",
   },
 };
 
@@ -106,7 +103,7 @@ export class ExcelService {
         const worksheet = context.workbook.worksheets.getActiveWorksheet();
         worksheet.protection.protect({
           allowInsertRows: true,
-          allowDeleteRows: true,
+          allowDeleteRows: false,
           allowFormatCells: true,
           allowSort: true,
           allowAutoFilter: true,
