@@ -171,7 +171,7 @@ export class ExcelService {
     if (!mapping) {
       throw new Error(`未知的文件類型: ${this.documentType}`);
     }
-    return Object.index(mapping);
+    return mapping;
   }
 
   async captureSnapshot() {
@@ -237,7 +237,7 @@ export class ExcelService {
             };
 
             // 使用欄位名稱作為key來儲存值
-            Object.entries(columnHeaders).forEach((key, index) => {
+            Object.entries(columnHeaders).forEach(([key, col], index) => {
               const value = ranges[index].values[row][0];
               snapshot[id].values[key] = value || "";
             });
