@@ -157,89 +157,89 @@ export class ExcelService {
     return generalPattern.test(id);
   }
 
-  _getTrackingColumns() {
-    switch (this.documentType) {
-      case 1:
-        return ["D"];
-      case 2:
-        return ["E"];
-      case 3:
-        return ["B", "C"];
-      default:
-        return [];
-    }
-  }
+  // _getTrackingColumns() {
+  //   switch (this.documentType) {
+  //     case 1:
+  //       return ["D"];
+  //     case 2:
+  //       return ["E"];
+  //     case 3:
+  //       return ["B", "C"];
+  //     default:
+  //       return [];
+  //   }
+  // }
 
-  async captureSnapshot() {
-    try {
-      const wasProtected = this.worksheetProtected;
-      if (wasProtected) {
-        await this.unprotectWorksheet();
-      }
+  // async captureSnapshot() {
+  //   try {
+  //     const wasProtected = this.worksheetProtected;
+  //     if (wasProtected) {
+  //       await this.unprotectWorksheet();
+  //     }
 
-      await Excel.run(async (context) => {
-        const worksheet = context.workbook.worksheets.getActiveWorksheet();
-        const usedRange = worksheet.getUsedRange();
-        usedRange.load(["values", "rowCount"]);
-        await context.sync();
+  //     await Excel.run(async (context) => {
+  //       const worksheet = context.workbook.worksheets.getActiveWorksheet();
+  //       const usedRange = worksheet.getUsedRange();
+  //       usedRange.load(["values", "rowCount"]);
+  //       await context.sync();
 
-        const trackingColumns = this._getTrackingColumns();
-        const snapshot = {};
+  //       const trackingColumns = this._getTrackingColumns();
+  //       const snapshot = {};
 
-        // 跳過標題行，從第二行開始
-        for (let row = 1; row < usedRange.rowCount; row++) {
-          let id = usedRange.values[row][0]; // A欄位值
+  //       // 跳過標題行，從第二行開始
+  //       for (let row = 1; row < usedRange.rowCount; row++) {
+  //         let id = usedRange.values[row][0]; // A欄位值
 
-          // 處理空白ID的情況
-          if (!id && this.documentType === 3) {
-            const hasData = trackingColumns.some((col) => usedRange.values[row][this._columnToIndex(col)] !== "");
+  //         // 處理空白ID的情況
+  //         if (!id && this.documentType === 3) {
+  //           const hasData = trackingColumns.some((col) => usedRange.values[row][this._columnToIndex(col)] !== "");
 
-            if (hasData) {
-              id = this.generateUniqueId();
-              // 更新Excel中的ID
-              const cell = worksheet.getRange(`A${row + 1}`);
-              cell.values = [[id]];
-            }
-          }
-          // 驗證ID格式
-          const range = worksheet.getRange(`${row + 1}:${row + 1}`);
+  //           if (hasData) {
+  //             id = this.generateUniqueId();
+  //             // 更新Excel中的ID
+  //             const cell = worksheet.getRange(`A${row + 1}`);
+  //             cell.values = [[id]];
+  //           }
+  //         }
+  //         // 驗證ID格式
+  //         const range = worksheet.getRange(`${row + 1}:${row + 1}`);
 
-          if (id && !this.validateId(id)) {
-            // 如果 ID 不合法，將底色設為紅色
-            range.format.fill.color = "red";
-          } else if (id && this.validateId(id)) {
-            // 如果 ID 合法，清除底色
-            range.format.fill.clear(); // 清除填充色
-          }
+  //         if (id && !this.validateId(id)) {
+  //           // 如果 ID 不合法，將底色設為紅色
+  //           range.format.fill.color = "red";
+  //         } else if (id && this.validateId(id)) {
+  //           // 如果 ID 合法，清除底色
+  //           range.format.fill.clear(); // 清除填充色
+  //         }
 
-          if (id) {
-            snapshot[id] = {
-              values: {},
-              timestamp: new Date().toISOString(),
-            };
-            // 記錄追蹤欄位的值
-            trackingColumns.forEach((col) => {
-              const value = usedRange.values[row][this._columnToIndex(col)];
-              snapshot[id].values[col] = value || "";
-            });
-          }
-        }
+  //         if (id) {
+  //           snapshot[id] = {
+  //             values: {},
+  //             timestamp: new Date().toISOString(),
+  //           };
+  //           // 記錄追蹤欄位的值
+  //           trackingColumns.forEach((col) => {
+  //             const value = usedRange.values[row][this._columnToIndex(col)];
+  //             snapshot[id].values[col] = value || "";
+  //           });
+  //         }
+  //       }
 
-        await context.sync();
-        this.currentSnapshot = snapshot;
-      });
+  //       await context.sync();
+  //       this.currentSnapshot = snapshot;
+  //     });
 
-      // 如果之前是保護狀態，重新啟用保護
-      if (wasProtected) {
-        await this.protectWorksheet();
-      }
+  //     // 如果之前是保護狀態，重新啟用保護
+  //     if (wasProtected) {
+  //       await this.protectWorksheet();
+  //     }
 
-      return this.currentSnapshot;
-    } catch (error) {
-      console.error("捕獲快照時發生錯誤:", error);
-      throw error;
-    }
-  }
+  //     return this.currentSnapshot;
+  //   } catch (error) {
+  //     console.error("捕獲快照時發生錯誤:", error);
+  //     throw error;
+  //   }
+  // }
 
   async compareWithSnapshot() {
     try {
