@@ -45,7 +45,6 @@ const COLUMN_MAPPINGS = {
       createdAt: "G",
       modifyAt: "H",
     },
-    required: ["type", "name"],
   },
 };
 
@@ -131,7 +130,7 @@ export class ExcelService {
         const worksheet = context.workbook.worksheets.getActiveWorksheet();
         worksheet.protection.protect({
           allowInsertRows: true,
-          allowDeleteRows: true,
+          allowDeleteRows: false,
           allowFormatCells: true,
           allowSort: true,
           allowAutoFilter: true,
@@ -254,39 +253,6 @@ export class ExcelService {
       throw new Error(`無法獲取 ID 欄位，未知的文件類型或配置: ${this.documentType}`);
     }
     return mapping.nonModifiable.id; // 返回 ID 對應的列名稱
-  }
-
-  // 更新：檢查必填欄位並標記顏色
-  async _validateAndMarkRequiredFields(worksheet, row, values, allColumns) {
-    const columnHeaders = this._getColumnHeaders();
-    const requiredFields = columnHeaders.required || [];
-    let isValid = true;
-
-    // 檢查必填欄位
-    for (const field of requiredFields) {
-      const value = values[field];
-      const isEmpty = value === undefined || value === null || value.toString().trim() === "";
-
-      if (isEmpty) {
-        isValid = false;
-        // 獲取欄位對應的列號並標記為紅色
-        const column = allColumns[field];
-        if (column) {
-          const cell = worksheet.getRange(`${column}${row}`);
-          cell.format.fill.color = "#FFB6C0"; // 淺紅色
-        }
-      }
-    }
-
-    // 標記整行的顏色
-    const rowRange = worksheet.getRange(`${row}:${row}`);
-    if (isValid && values.id && this.validateId(values.id)) {
-      rowRange.format.fill.color = "#90EE90"; // 淺綠色
-    } else {
-      rowRange.format.fill.clear(); // 清除整行的底色
-    }
-
-    return isValid;
   }
 
   async captureSnapshot() {
@@ -442,29 +408,27 @@ export class ExcelService {
               const value = ranges[index].values[row][0];
               currentValues[key] = value || "";
             });
-            // 只在所有必填欄位都有值的情況下才記錄變更
-            if (this._validateRequiredFields(currentValues.id, currentValues)) {
-              // 比較與快照的差異
-              if (this.currentSnapshot[id]) {
-                const hasChanges = Object.keys(columnHeaders).some(
-                  (key) => this.currentSnapshot[id].values[key] !== currentValues[key]
-                );
 
-                if (hasChanges) {
-                  changes[id] = {
-                    values: currentValues,
-                    timestamp: new Date().toISOString(),
-                    isSync: false,
-                  };
-                }
-              } else {
-                // 新增的記錄
+            // 比較與快照的差異
+            if (this.currentSnapshot[id]) {
+              const hasChanges = Object.keys(columnHeaders).some(
+                (key) => this.currentSnapshot[id].values[key] !== currentValues[key]
+              );
+
+              if (hasChanges) {
                 changes[id] = {
                   values: currentValues,
                   timestamp: new Date().toISOString(),
                   isSync: false,
                 };
               }
+            } else {
+              // 新增的記錄
+              changes[id] = {
+                values: currentValues,
+                timestamp: new Date().toISOString(),
+                isSync: false,
+              };
             }
           }
         }
@@ -486,6 +450,45 @@ export class ExcelService {
 
   _columnToIndex(column) {
     return column.charCodeAt(0) - "A".charCodeAt(0);
+  }
+
+  groupChangesByType(changes) {
+    const groupedChanges = {
+      1: {}, // 加工件
+      2: {}, // 市購件
+      3: {}, // 檔案類型是1或2
+      4: {}, // 其餘
+    };
+
+    Object.entries(changes).forEach(([id, data]) => {
+      const type = data.values.type; // 假設 'type' 欄位是指定的分類依據
+
+      if (type === "1" || type === "2") {
+        groupedChanges[3][id] = data;
+      } else if (type === "市購件") {
+        groupedChanges[2][id] = data;
+      } else if (type === "加工件") {
+        groupedChanges[1][id] = data;
+      } else {
+        groupedChanges[4][id] = data;
+      }
+    });
+
+    return groupedChanges;
+  }
+
+  getGroupedChanges(type) {
+    if (!this.groupedChanges) {
+      console.error("請先執行 groupChangesByType 函式以初始化分組資料！");
+      return null;
+    }
+
+    if (!this.groupedChanges[type]) {
+      console.error(`分類 ${type} 不存在！`);
+      return null;
+    }
+
+    return this.groupedChanges[type];
   }
 
   // generateChangeReport(changes) {

@@ -11,21 +11,17 @@ export class ApiService {
     return response.json();
   }
 
-  async sendChanges(workbookName, changes) {
-    const changeEntries = Object.entries(changes);
-    if (changeEntries.length === 0) {
+  async sendChanges(type, changes) {
+    if (!changes || Object.keys(changes).length === 0) {
+      console.warn("沒有變更需要上傳");
       return;
     }
 
     const requestBody = {
-      id: workbookName,
-      data: changeEntries.map(([id, items]) => ({
-        id,
-        items: Object.entries(items).map(([header, value]) => ({ header, value })),
-      })),
+      changes,
     };
 
-    const response = await fetch(this.baseUrl, {
+    const response = await fetch(`${this.baseUrl}/${type}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
