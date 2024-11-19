@@ -238,6 +238,7 @@ export class ExcelService {
 
             // 使用欄位名稱作為key來儲存值
             Object.entries(columnHeaders).forEach(([key, col], index) => {
+              console.log(key, col, index);
               const value = ranges[index].values[row][0];
               snapshot[id].values[key] = value || "";
             });
