@@ -143,7 +143,7 @@ class TaskPane {
   async syncTableWithApi() {
     try {
       // 檢查文件類型是否有效
-      if (!this.documentType || this.documentType > 3) {
+      if (!this.excelService.documentType || this.excelService.documentType > 3) {
         throw new Error("無效的文件類型");
       }
 
