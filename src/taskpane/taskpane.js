@@ -5,7 +5,6 @@ class TaskPane {
   constructor() {
     this.excelService = new ExcelService();
     this.apiService = new ApiService();
-    this.changesStore = new ChangesStore();
     this.isValidDocumentType = false;
   }
 
