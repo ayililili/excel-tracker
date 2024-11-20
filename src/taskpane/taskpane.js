@@ -159,7 +159,7 @@ class TaskPane {
         // 更新Excel表格
         await this.excelService.updateFromApiData(apiData);
 
-        console.log(`成功同步文件類型 ${this.documentType} 的數據`);
+        console.log(`成功同步文件類型 ${this.excelService.documentType} 的數據`);
         return {
           success: true,
           message: "數據同步成功",

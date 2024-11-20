@@ -325,7 +325,9 @@ export class ExcelService {
           }
         }
 
-        await this.updateHeaderCell();
+        if (this.documentType === DOCUMENT_TYPES.DEPARTMENT) {
+          await this.updateHeaderCell();
+        }
         await context.sync();
         this.currentSnapshot = snapshot;
       });
@@ -433,7 +435,9 @@ export class ExcelService {
           }
         }
 
-        await this.updateHeaderCell();
+        if (this.documentType === DOCUMENT_TYPES.DEPARTMENT) {
+          await this.updateHeaderCell();
+        }
         await context.sync();
       });
 
@@ -460,6 +464,7 @@ export class ExcelService {
       }
 
       await Excel.run(async (context) => {
+        console.log(apiData);
         const worksheet = context.workbook.worksheets.getActiveWorksheet();
         const columnHeaders = this._getColumnHeaders();
         const idColumn = this._getIdColumn();
