@@ -329,6 +329,7 @@ export class ExcelService {
           await this.updateHeaderCell();
         }
         await context.sync();
+        console.log(snapshot);
         this.currentSnapshot = snapshot;
       });
 
