@@ -493,7 +493,11 @@ export class ExcelService {
               const column = columnHeaders.nonModifiable[field];
               if (column) {
                 const cell = worksheet.getRange(`${column}${actualRowIndex}`);
-                cell.values = [[value]];
+                if (value === "") {
+                  cell.clear("Contents");
+                } else {
+                  cell.values = [[value]];
+                }
               }
             }
           } else {
@@ -509,7 +513,11 @@ export class ExcelService {
               const column = columnHeaders.modifiable[field] || columnHeaders.nonModifiable[field];
               if (column) {
                 const cell = worksheet.getRange(`${column}${lastRowIndex}`);
-                cell.values = [[value]];
+                if (value === "") {
+                  cell.clear("Contents");
+                } else {
+                  cell.values = [[value]];
+                }
               }
             }
           }
