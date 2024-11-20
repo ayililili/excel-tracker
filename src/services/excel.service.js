@@ -510,7 +510,7 @@ export class ExcelService {
               const column = columnHeaders.modifiable[field] || columnHeaders.nonModifiable[field];
               if (column) {
                 const cell = worksheet.getRange(`${column}${lastRowIndex}`);
-                cell.values = [[value]];
+                cell.values = "123";
               }
             }
           }
