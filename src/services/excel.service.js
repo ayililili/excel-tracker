@@ -16,7 +16,7 @@ const COLUMN_MAPPINGS = {
       id: "A",
       name: "C",
       type: "B",
-      // isRevoked: "F",
+      isRevoked: "F",
       createdAt: "G",
       modifyAt: "H",
     },
@@ -29,7 +29,7 @@ const COLUMN_MAPPINGS = {
       id: "B",
       name: "C",
       type: "A",
-      // isRevoked: "E",
+      isRevoked: "E",
       createdAt: "F",
       modifyAt: "G",
     },
@@ -38,7 +38,7 @@ const COLUMN_MAPPINGS = {
     modifiable: {
       name: "C",
       type: "B",
-      // isRevoked: "F",
+      isRevoked: "F",
     },
     nonModifiable: {
       id: "A",
@@ -464,18 +464,15 @@ export class ExcelService {
       }
 
       await Excel.run(async (context) => {
-        console.log(apiData);
         const worksheet = context.workbook.worksheets.getActiveWorksheet();
         const columnHeaders = this._getColumnHeaders();
         const idColumn = this._getIdColumn();
-        console.log(idColumn);
 
         // 獲取當前使用的範圍
         const usedRange = worksheet.getUsedRange();
         usedRange.load("rowCount");
         await context.sync();
         let lastRowIndex = usedRange.rowCount;
-        console.log(lastRowIndex);
 
         // 獲取所有ID的值
         const idRange = worksheet.getRange(`${idColumn}2:${idColumn}${usedRange.rowCount}`);
@@ -493,7 +490,7 @@ export class ExcelService {
 
             // 更新可修改的欄位
             for (const [field, value] of Object.entries(data.values)) {
-              const column = columnHeaders.modifiable[field] || columnHeaders.nonModifiable[field];
+              const column = columnHeaders.nonModifiable[field];
               if (column) {
                 const cell = worksheet.getRange(`${column}${actualRowIndex}`);
                 cell.values = [[value]];
