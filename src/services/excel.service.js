@@ -468,12 +468,14 @@ export class ExcelService {
         const worksheet = context.workbook.worksheets.getActiveWorksheet();
         const columnHeaders = this._getColumnHeaders();
         const idColumn = this._getIdColumn();
+        console.log(idColumn);
 
         // 獲取當前使用的範圍
         const usedRange = worksheet.getUsedRange();
         usedRange.load("rowCount");
         await context.sync();
         let lastRowIndex = usedRange.rowCount;
+        console.log(lastRowIndex);
 
         // 獲取所有ID的值
         const idRange = worksheet.getRange(`${idColumn}2:${idColumn}${usedRange.rowCount}`);
