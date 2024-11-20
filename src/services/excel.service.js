@@ -288,19 +288,19 @@ export class ExcelService {
         for (let row = 1; row < idValues.length; row++) {
           let id = idValues[row][0];
 
-          // 處理空白ID的情況
-          if (!id && this.documentType === DOCUMENT_TYPES.DEPARTMENT) {
-            const hasData = Object.values(columnHeaders).some((_, index) => {
-              return ranges[index].values[row][0] !== "";
-            });
+          // // 處理空白ID的情況
+          // if (!id && this.documentType === DOCUMENT_TYPES.DEPARTMENT) {
+          //   const hasData = Object.values(columnHeaders).some((_, index) => {
+          //     return ranges[index].values[row][0] !== "";
+          //   });
 
-            if (hasData) {
-              id = this.generateUniqueId();
-              // 更新Excel中的ID
-              const cell = worksheet.getRange(`${idColumn}${row + 1}`);
-              cell.values = [[id]];
-            }
-          }
+          //   if (hasData) {
+          //     id = this.generateUniqueId();
+          //     // 更新Excel中的ID
+          //     const cell = worksheet.getRange(`${idColumn}${row + 1}`);
+          //     cell.values = [[id]];
+          //   }
+          // }
 
           // 驗證ID格式
           const rowRange = worksheet.getRange(`${row + 1}:${row + 1}`);
