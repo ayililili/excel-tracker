@@ -357,6 +357,7 @@ export class ExcelService {
         const worksheet = context.workbook.worksheets.getActiveWorksheet();
         const columnHeaders = this._getColumnHeaders().modifiable;
         const idColumn = this._getIdColumn(); // 動態獲取 ID 欄位
+        const requiredFields = ["type", "name"]; // 必填欄位名稱
 
         // 首先獲取最後一行
         const lastRow = worksheet.getUsedRange().getLastRow();
@@ -377,24 +378,37 @@ export class ExcelService {
         // 跳過標題行，從第二行開始
         for (let row = 1; row < idValues.length; row++) {
           let id = idValues[row][0];
+          const rowHasData = Object.values(columnHeaders).some((_, index) => ranges[index].values[row][0] !== "");
 
-          // 處理空白ID的情況
-          if (!id && this.documentType === DOCUMENT_TYPES.DEPARTMENT) {
-            const hasData = Object.values(columnHeaders).some((_, index) => {
-              return ranges[index].values[row][0] !== "";
-            });
+          if (!id && this.documentType === DOCUMENT_TYPES.DEPARTMENT && rowHasData) {
+            let missingRequired = false;
 
-            if (hasData) {
-              id = this.generateUniqueId();
-              // 更新Excel中的ID
-              const cell = worksheet.getRange(`${idColumn}${row + 1}`);
-              cell.values = [[id]];
+            // 檢查必填欄位是否有值
+            for (const field of requiredFields) {
+              const column = columnHeaders[field];
+              const value = ranges[Object.keys(columnHeaders).indexOf(field)].values[row][0];
+
+              if (!value) {
+                // 設置儲存格背景為紅色
+                const cell = worksheet.getRange(`${column}${row + 1}`);
+                cell.format.fill.color = "red";
+                missingRequired = true;
+              }
             }
+
+            // 如果有缺少必填項目，跳過ID生成
+            if (missingRequired) {
+              continue;
+            }
+
+            // 如果必填項都完整，生成新ID並寫入
+            id = this.generateUniqueId();
+            const idCell = worksheet.getRange(`${idColumn}${row + 1}`);
+            idCell.values = [[id]];
           }
 
           // 驗證ID格式
           const rowRange = worksheet.getRange(`${row + 1}:${row + 1}`);
-
           if (id && !this.validateId(id)) {
             rowRange.format.fill.color = "red";
             continue;
