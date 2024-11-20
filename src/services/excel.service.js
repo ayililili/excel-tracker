@@ -502,14 +502,14 @@ export class ExcelService {
             lastRowIndex = lastRowIndex + 1;
 
             // 先設置ID
-            const idCell = worksheet.getRange(`${idColumn}${newRowIndex}`);
+            const idCell = worksheet.getRange(`${idColumn}${lastRowIndex}`);
             idCell.values = [[id]];
 
             // 設置其他欄位的值
             for (const [field, value] of Object.entries(data.values)) {
               const column = columnHeaders.modifiable[field] || columnHeaders.nonModifiable[field];
               if (column) {
-                const cell = worksheet.getRange(`${column}${newRowIndex}`);
+                const cell = worksheet.getRange(`${column}${lastRowIndex}`);
                 cell.values = [[value]];
               }
             }
