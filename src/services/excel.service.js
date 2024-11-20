@@ -473,6 +473,7 @@ export class ExcelService {
         const usedRange = worksheet.getUsedRange();
         usedRange.load("rowCount");
         await context.sync();
+        let lastRowIndex = usedRange.rowCount;
 
         // 獲取所有ID的值
         const idRange = worksheet.getRange(`${idColumn}2:${idColumn}${usedRange.rowCount}`);
@@ -498,7 +499,7 @@ export class ExcelService {
             }
           } else {
             // 在最後一行後面添加新行
-            const newRowIndex = usedRange.rowCount + 1;
+            lastRowIndex = lastRowIndex + 1;
 
             // 先設置ID
             const idCell = worksheet.getRange(`${idColumn}${newRowIndex}`);
