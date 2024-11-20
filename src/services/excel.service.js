@@ -16,7 +16,7 @@ const COLUMN_MAPPINGS = {
       id: "A",
       name: "C",
       type: "B",
-      isRevoked: "F",
+      // isRevoked: "F",
       createdAt: "G",
       modifyAt: "H",
     },
@@ -29,7 +29,7 @@ const COLUMN_MAPPINGS = {
       id: "B",
       name: "C",
       type: "A",
-      isRevoked: "E",
+      // isRevoked: "E",
       createdAt: "F",
       modifyAt: "G",
     },
@@ -38,7 +38,7 @@ const COLUMN_MAPPINGS = {
     modifiable: {
       name: "C",
       type: "B",
-      isRevoked: "F",
+      // isRevoked: "F",
     },
     nonModifiable: {
       id: "A",
@@ -494,7 +494,7 @@ export class ExcelService {
               const column = columnHeaders.modifiable[field] || columnHeaders.nonModifiable[field];
               if (column) {
                 const cell = worksheet.getRange(`${column}${actualRowIndex}`);
-                cell.values = "123";
+                cell.values = [[value]];
               }
             }
           } else {
@@ -510,7 +510,7 @@ export class ExcelService {
               const column = columnHeaders.modifiable[field] || columnHeaders.nonModifiable[field];
               if (column) {
                 const cell = worksheet.getRange(`${column}${lastRowIndex}`);
-                cell.values = "123";
+                cell.values = [[value]];
               }
             }
           }
