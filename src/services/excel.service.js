@@ -467,6 +467,11 @@ export class ExcelService {
         const worksheet = context.workbook.worksheets.getActiveWorksheet();
         const columnHeaders = this._getColumnHeaders();
         const idColumn = this._getIdColumn();
+        const documentType = DOCUMENT_TYPES.DEPARTMENT; // 假設為類型3的表
+
+        // 必填欄位配置
+        const requiredFields = ["type", "name"];
+        const mappings = COLUMN_MAPPINGS[documentType];
 
         // 獲取當前使用的範圍
         const usedRange = worksheet.getUsedRange();
@@ -488,12 +493,16 @@ export class ExcelService {
             // 更新現有行
             const actualRowIndex = existingRowIndex + 2; // 加2是因為索引從0開始且有標題行
 
-            // 更新可修改的欄位
+            // 更新欄位並檢查必填
             for (const [field, value] of Object.entries(data.values)) {
-              const column = columnHeaders.nonModifiable[field];
+              const column = mappings.modifiable[field] || mappings.nonModifiable[field];
               if (column) {
                 const cell = worksheet.getRange(`${column}${actualRowIndex}`);
                 if (value === "") {
+                  // 必填項目設置紅色底色
+                  if (requiredFields.includes(field)) {
+                    cell.format.fill.color = "red";
+                  }
                   cell.clear("Contents");
                 } else {
                   cell.values = [[value]];
@@ -508,12 +517,16 @@ export class ExcelService {
             const idCell = worksheet.getRange(`${idColumn}${lastRowIndex}`);
             idCell.values = [[id]];
 
-            // 設置其他欄位的值
+            // 設置其他欄位的值並檢查必填
             for (const [field, value] of Object.entries(data.values)) {
-              const column = columnHeaders.modifiable[field] || columnHeaders.nonModifiable[field];
+              const column = mappings.modifiable[field] || mappings.nonModifiable[field];
               if (column) {
                 const cell = worksheet.getRange(`${column}${lastRowIndex}`);
                 if (value === "") {
+                  // 必填項目設置紅色底色
+                  if (requiredFields.includes(field)) {
+                    cell.format.fill.color = "red";
+                  }
                   cell.clear("Contents");
                 } else {
                   cell.values = [[value]];
