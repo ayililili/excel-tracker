@@ -28,6 +28,7 @@ const COLUMN_MAPPINGS = {
       expectedDeliveryDate: "O",
       requisitioner: "P",
       requisitionerNotes: "Q",
+      isRevoked: "R",
     },
   },
   [DOCUMENT_TYPES.PURCHASE]: {
@@ -54,6 +55,7 @@ const COLUMN_MAPPINGS = {
       expectedDeliveryDate: "P",
       requisitioner: "Q",
       requisitionerNotes: "R",
+      isRevoked: "U",
     },
   },
   [DOCUMENT_TYPES.DEPARTMENT]: {
@@ -74,6 +76,7 @@ const COLUMN_MAPPINGS = {
       expectedDeliveryDate: "S",
       requisitioner: "T",
       requisitionerNotes: "U",
+      isRevoked: "Z",
     },
     nonModifiable: {
       id: "A",
@@ -406,7 +409,7 @@ export class ExcelService {
         const ranges = rangeAddresses.map((address) => worksheet.getRange(address).load("values"));
 
         await context.sync();
-
+        console.log(ranges);
         const idValues = ranges[ranges.length - 1].values; // ID列的值
 
         // 跳過標題行，從第二行開始
