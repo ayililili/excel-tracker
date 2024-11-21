@@ -469,7 +469,7 @@ export class ExcelService {
                 rowRange.format.font.strikethrough = true;
 
                 // 鎖定整行，防止編輯
-                rowRange.protection.locked = true;
+                rowRange.format.protection.locked = true;
               }
             });
 
