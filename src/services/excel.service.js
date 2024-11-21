@@ -363,9 +363,6 @@ export class ExcelService {
           }
         }
 
-        if (this.documentType === DOCUMENT_TYPES.DEPARTMENT) {
-          await this.updateHeaderCell();
-        }
         await context.sync();
         this.currentSnapshot = snapshot;
       });
@@ -486,12 +483,10 @@ export class ExcelService {
                 isSync: false,
               };
             }
-            if (changes[id]) {
-              console.log(changes[id].values);
-            }
             // 新增專案號
             if (this.documentType === DOCUMENT_TYPES.DEPARTMENT && changes[id]) {
-              changes[id].values.projectNumber = this.projectNumber;
+              console.log(this.projectNumber);
+              changes[id].values[projectNumber] = this.projectNumber;
             }
           }
         }
