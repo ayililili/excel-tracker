@@ -518,7 +518,8 @@ export class ExcelService {
         await this.protectWorksheet();
       }
 
-      return changes;
+      const groupedChanges = groupChangesByType(changes);
+      return groupedChanges;
     } catch (error) {
       console.error("比較狀態時發生錯誤:", error);
       throw error;
