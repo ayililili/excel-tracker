@@ -16,7 +16,7 @@ const COLUMN_MAPPINGS = {
     },
     nonModifiable: {
       id: "A",
-      caseNumber: "B",
+      projectNumber: "B",
       moduleCode: "C",
       itemName: "D",
       specificationModel: "E",
@@ -39,7 +39,7 @@ const COLUMN_MAPPINGS = {
     },
     nonModifiable: {
       id: "A",
-      caseNumber: "B",
+      projectNumber: "B",
       moduleCode: "C",
       itemName: "D",
       specificationModel: "E",
@@ -340,20 +340,6 @@ export class ExcelService {
         for (let row = 1; row < idValues.length; row++) {
           let id = idValues[row][0];
 
-          // // 處理空白ID的情況
-          // if (!id && this.documentType === DOCUMENT_TYPES.DEPARTMENT) {
-          //   const hasData = Object.values(columnHeaders).some((_, index) => {
-          //     return ranges[index].values[row][0] !== "";
-          //   });
-
-          //   if (hasData) {
-          //     id = this.generateUniqueId();
-          //     // 更新Excel中的ID
-          //     const cell = worksheet.getRange(`${idColumn}${row + 1}`);
-          //     cell.values = [[id]];
-          //   }
-          // }
-
           // 驗證ID格式
           const rowRange = worksheet.getRange(`${row + 1}:${row + 1}`);
 
@@ -431,6 +417,7 @@ export class ExcelService {
           let id = idValues[row][0];
           const rowHasData = Object.values(columnHeaders).some((_, index) => ranges[index].values[row][0] !== "");
 
+          // 處理空白ID的情況
           if (!id && this.documentType === DOCUMENT_TYPES.DEPARTMENT && rowHasData) {
             let missingRequired = false;
 
@@ -473,7 +460,7 @@ export class ExcelService {
             const currentValues = {};
 
             // 使用欄位名稱作為key來獲取值
-            Object.entries(columnHeaders).forEach(([key, col], index) => {
+            Object.entries(columnHeaders).forEach(([key, _], index) => {
               const value = ranges[index].values[row][0];
               currentValues[key] = value || "";
             });
@@ -498,9 +485,9 @@ export class ExcelService {
                 timestamp: new Date().toISOString(),
                 isSync: false,
               };
-
-              if (this.documentType) {
-              }
+            }
+            if (this.documentType === DOCUMENT_TYPES.DEPARTMENT && changes[id]) {
+              changes[id].values.projectNumber = this.projectNumber;
             }
           }
         }
