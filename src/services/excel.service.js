@@ -395,6 +395,8 @@ export class ExcelService {
         const worksheet = context.workbook.worksheets.getActiveWorksheet();
         const columnHeaders = this._getColumnHeaders().modifiable;
         const idColumn = this._getIdColumn(); // 動態獲取 ID 欄位
+        const isRevokedColum = columnHeaders.isRevoked;
+        console.log(isRevokedColum);
 
         // 首先獲取最後一行
         const lastRow = worksheet.getUsedRange().getLastRow();
@@ -409,7 +411,6 @@ export class ExcelService {
         const ranges = rangeAddresses.map((address) => worksheet.getRange(address).load("values"));
 
         await context.sync();
-        console.log(ranges);
         const idValues = ranges[ranges.length - 1].values; // ID列的值
 
         // 跳過標題行，從第二行開始
