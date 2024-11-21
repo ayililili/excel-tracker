@@ -463,7 +463,7 @@ export class ExcelService {
 
               // 如果已標記作廢，設置整行為灰色，加刪除線
               if (currentValues.isRevoked) {
-                rowRange.format.fill.color = "gray"; // 淺灰色
+                rowRange.format.fill.color = "gray";
                 rowRange.format.font.strikethrough = true;
 
                 // 鎖定整行，防止編輯
