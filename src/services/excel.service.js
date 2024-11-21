@@ -438,12 +438,14 @@ export class ExcelService {
             for (const field of REQUIRED_FIELDS) {
               const column = columnHeaders[field];
               const value = ranges[Object.keys(columnHeaders).indexOf(field)].values[row][0];
+              const cell = worksheet.getRange(`${column}${row + 1}`);
 
               if (!value) {
                 // 設置儲存格背景為紅色
-                const cell = worksheet.getRange(`${column}${row + 1}`);
                 cell.format.fill.color = "red";
                 missingRequired = true;
+              } else {
+                rowRange.format.fill.clear();
               }
             }
 
@@ -496,6 +498,9 @@ export class ExcelService {
                 timestamp: new Date().toISOString(),
                 isSync: false,
               };
+
+              if (this.documentType) {
+              }
             }
           }
         }
