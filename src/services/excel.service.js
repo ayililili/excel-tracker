@@ -103,6 +103,11 @@ const REQUIRED_FIELDS = [
   "requisitioner",
 ];
 
+const PART_TYPES = {
+  processing: ["車床", "車床+銑床", "板金", "焊工", "焊工+銑床", "焊工+龍銑", "鋁擠加工", "鋁擠組裝", "銑床"],
+  purchase: ["加工件"],
+};
+
 export class ExcelService {
   constructor() {
     this.workbookName = "";
@@ -119,11 +124,11 @@ export class ExcelService {
     const wasProtected = await this.checkProtectionStatus();
 
     if (fileName.startsWith("加工件發包")) {
-      this.documentType = 1;
+      this.documentType = DOCUMENT_TYPES.PROCESSING;
     } else if (fileName.startsWith("市購件發包")) {
-      this.documentType = 2;
+      this.documentType = DOCUMENT_TYPES.PURCHASE;
     } else if (fileName.match(/^F-FA-P05 採購BOM表單_.*_.*/)) {
-      this.documentType = 3;
+      this.documentType = DOCUMENT_TYPES.DEPARTMENT;
       const matches = fileName.match(/^F-FA-P05 採購BOM表單_(.*)_(.*)\.[^\.]+$/);
       if (matches) {
         this.departmentName = matches[1];
@@ -201,7 +206,7 @@ export class ExcelService {
 
   // 新增：解除工作表保護的方法
   async unprotectWorksheet() {
-    if (this.documentType !== 3) return;
+    if (this.documentType !== DOCUMENT_TYPES.DEPARTMENT) return;
 
     try {
       await Excel.run(async (context) => {
@@ -308,6 +313,10 @@ export class ExcelService {
       throw new Error(`無法獲取 ID 欄位，未知的文件類型或配置: ${this.documentType}`);
     }
     return mapping.nonModifiable.id; // 返回 ID 對應的列名稱
+  }
+
+  _columnToIndex(column) {
+    return column.charCodeAt(0) - "A".charCodeAt(0);
   }
 
   async captureSnapshot() {
@@ -516,8 +525,27 @@ export class ExcelService {
     }
   }
 
-  _columnToIndex(column) {
-    return column.charCodeAt(0) - "A".charCodeAt(0);
+  groupChangesByType(changes) {
+    const groupedChanges = {
+      [DOCUMENT_TYPES.PROCESSING]: {}, // 加工件
+      [DOCUMENT_TYPES.PURCHASE]: {}, // 市購件
+      [DOCUMENT_TYPES.DEPARTMENT]: {}, // 檔案類型是1或2
+    };
+
+    for (const [id, changeData] of Object.entries(changes)) {
+      const documentType = this.documentType;
+      const partType = changeData.values.partType;
+
+      if (documentType === DOCUMENT_TYPES.PROCESSING || documentType === DOCUMENT_TYPES.PURCHASE) {
+        groupedChanges[DOCUMENT_TYPES.DEPARTMENT][id] = changeData;
+      } else if (PART_TYPES.processing.includes(partType)) {
+        groupedChanges[DOCUMENT_TYPES.PROCESSING][id] = changeData;
+      } else if (PART_TYPES.purchase.includes(partType)) {
+        groupedChanges[DOCUMENT_TYPES.PURCHASE][id] = changeData;
+      }
+    }
+
+    return groupedChanges;
   }
 
   async updateFromApiData(apiData) {

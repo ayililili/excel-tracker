@@ -1,18 +1,6 @@
 import { ExcelService } from "../services/excel.service";
 import { ApiService } from "../services/api.service";
 
-const PROCESSING_PART_TYPES = [
-  "車床",
-  "車床+銑床",
-  "板金",
-  "焊工",
-  "焊工+銑床",
-  "焊工+龍銑",
-  "鋁擠加工",
-  "鋁擠組裝",
-  "銑床",
-];
-
 class TaskPane {
   constructor() {
     this.excelService = new ExcelService();
@@ -73,34 +61,6 @@ class TaskPane {
     document.getElementById("push").onclick = () => this.sendChangesToApi();
     document.getElementById("pull").onclick = () => this.syncTableWithApi();
     document.getElementById("restart").onclick = () => this.restartWorkbook();
-  }
-
-  groupChangesByType(changes) {
-    const groupedChanges = {
-      1: {}, // 加工件
-      2: {}, // 市購件
-      3: {}, // 檔案類型是1或2
-      4: {}, // 其餘
-    };
-
-    Object.entries(changes).forEach(([id, data]) => {
-      const documentType = this.excelService.documentType;
-      const partType = data.values.partType; // 假設 'partType' 欄位是指定的分類依據
-
-      if (documentType === 1 || documentType === 2) {
-        groupedChanges[3][id] = data;
-      } else if (PROCESSING_PART_TYPES.includes(partType)) {
-        // 判斷是否屬於加工件類型
-        groupedChanges[1][id] = data;
-      } else if (partType === "市購件") {
-        groupedChanges[2][id] = data;
-      } else {
-        // 其餘
-        groupedChanges[4][id] = data;
-      }
-    });
-
-    return groupedChanges;
   }
 
   async sendChangesToApi() {
