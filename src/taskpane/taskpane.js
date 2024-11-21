@@ -97,7 +97,7 @@ class TaskPane {
       console.log(data);
       const partType = data.values.partType; // 假設 'type' 欄位是指定的分類依據
 
-      if (documentType === "1" || documentType === "2") {
+      if (documentType === 1 || documentType === 2) {
         console.log(documentType);
         groupedChanges[3][id] = data;
       } else if (partType === "市購件") {
