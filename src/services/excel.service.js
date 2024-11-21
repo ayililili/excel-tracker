@@ -464,7 +464,7 @@ export class ExcelService {
               currentValues[key] = value || "";
 
               // 如果已標記作廢，設置整行為灰色，加刪除線
-              if (currentValues[isRevoked]) {
+              if (currentValues.isRevoked) {
                 rowRange.format.fill.color = "#D3D3D3"; // 淺灰色
                 rowRange.format.font.strikethrough = true;
 
