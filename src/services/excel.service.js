@@ -115,13 +115,13 @@ export class ExcelService {
     const fileName = await this.getWorkbookName();
     const wasProtected = await this.checkProtectionStatus();
 
-    if (fileName.startsWith("加工件採購")) {
+    if (fileName.startsWith("加工件發包")) {
       this.documentType = 1;
-    } else if (fileName.startsWith("市購件請購")) {
+    } else if (fileName.startsWith("市購件發包")) {
       this.documentType = 2;
-    } else if (fileName.match(/^採購BOM表單_.*_.*/)) {
+    } else if (fileName.match(/^F-FA-P05 採購BOM表單_.*_.*/)) {
       this.documentType = 3;
-      const matches = fileName.match(/^採購BOM表單_(.*)_(.*)\.[^\.]+$/);
+      const matches = fileName.match(/^F-FA-P05 採購BOM表單_(.*)_(.*)\.[^\.]+$/);
       if (matches) {
         this.departmentName = matches[1];
         this.projectNumber = matches[2];
