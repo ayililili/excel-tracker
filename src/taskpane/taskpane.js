@@ -94,18 +94,16 @@ class TaskPane {
 
     Object.entries(changes).forEach(([id, data]) => {
       const documentType = this.excelService.documentType;
-      console.log(documentType);
       console.log(data);
       const partType = data.values.partType; // 假設 'type' 欄位是指定的分類依據
 
       if (documentType === "1" || documentType === "2") {
+        console.log(documentType);
         groupedChanges[3][id] = data;
       } else if (partType === "市購件") {
         groupedChanges[2][id] = data;
       } else if (partType === "加工件") {
         groupedChanges[1][id] = data;
-      } else {
-        groupedChanges[4][id] = data;
       }
     });
 
