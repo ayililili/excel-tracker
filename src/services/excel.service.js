@@ -105,7 +105,7 @@ const REQUIRED_FIELDS = [
 
 const PART_TYPES = {
   processing: ["車床", "車床+銑床", "板金", "焊工", "焊工+銑床", "焊工+龍銑", "鋁擠加工", "鋁擠組裝", "銑床"],
-  purchase: ["加工件"],
+  purchase: ["市購件"],
 };
 
 export class ExcelService {
@@ -477,6 +477,11 @@ export class ExcelService {
 
                 // 鎖定整行，防止編輯
                 rowRange.format.protection.locked = true;
+              }
+              // 如果是 partType 欄位，檢查是否已經有值
+              else if (key === "partType" && value) {
+                const partTypeCell = worksheet.getRange(`${index}${row + 1}`);
+                partTypeCell.format.protection.locked = true;
               }
             });
 
