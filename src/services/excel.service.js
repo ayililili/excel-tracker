@@ -9,44 +9,96 @@ const DOCUMENT_TYPES = {
 const COLUMN_MAPPINGS = {
   [DOCUMENT_TYPES.PROCESSING]: {
     modifiable: {
-      brand: "D",
-      num: "E",
+      vendor: "J",
+      orderQuantity: "K",
+      transferOrderNumber: "L",
+      procurementDeliveryDate: "M",
     },
     nonModifiable: {
       id: "A",
-      name: "C",
-      type: "B",
-      isRevoked: "F",
-      createdAt: "G",
-      modifyAt: "H",
+      caseNumber: "B",
+      moduleCode: "C",
+      itemName: "D",
+      specificationModel: "E",
+      partType: "F",
+      unit: "G",
+      bomQuantity: "H",
+      stockQuantity: "I",
+      inquiryDate: "N",
+      expectedDeliveryDate: "O",
+      requisitioner: "P",
+      requisitionerNotes: "Q",
     },
   },
   [DOCUMENT_TYPES.PURCHASE]: {
     modifiable: {
-      num: "D",
+      orderQuantity: "M",
+      transferOrderNumber: "N",
+      vendor: "S",
+      procurementDeliveryDate: "T",
     },
     nonModifiable: {
-      id: "B",
-      name: "C",
-      type: "A",
-      isRevoked: "E",
-      createdAt: "F",
-      modifyAt: "G",
+      id: "A",
+      caseNumber: "B",
+      moduleCode: "C",
+      itemName: "D",
+      specificationModel: "E",
+      brand: "F",
+      alternativeItemName: "G",
+      alternativeSpecificationModel: "H",
+      alternativeBrand: "I",
+      unit: "J",
+      bomQuantity: "K",
+      stockQuantity: "L",
+      inquiryDate: "O",
+      expectedDeliveryDate: "P",
+      requisitioner: "Q",
+      requisitionerNotes: "R",
     },
   },
   [DOCUMENT_TYPES.DEPARTMENT]: {
     modifiable: {
-      name: "C",
-      type: "B",
-      isRevoked: "F",
+      keyComponent: "B",
+      moduleCode: "C",
+      itemName: "D",
+      specificationModel: "E",
+      brand: "F",
+      alternativeItemName: "G",
+      alternativeSpecificationModel: "H",
+      alternativeBrand: "I",
+      partType: "J",
+      unit: "K",
+      bomQuantity: "L",
+      stockQuantity: "M",
+      inquiryDate: "R",
+      expectedDeliveryDate: "S",
+      requisitioner: "T",
+      requisitionerNotes: "U",
     },
     nonModifiable: {
       id: "A",
-      createdAt: "G",
-      modifyAt: "H",
+      vendor: "N",
+      orderQuantity: "O",
+      transferOrderNumber: "P",
+      procurementDeliveryDate: "Q",
     },
   },
 };
+
+const REQUIRED_FIELDS = [
+  "keyComponent",
+  "moduleCode",
+  "itemName",
+  "specificationModel",
+  "brand",
+  "partType",
+  "unit",
+  "bomQuantity",
+  "stockQuantity",
+  "inquiryDate",
+  "expectedDeliveryDate",
+  "requisitioner",
+];
 
 export class ExcelService {
   constructor() {
@@ -357,7 +409,6 @@ export class ExcelService {
         const worksheet = context.workbook.worksheets.getActiveWorksheet();
         const columnHeaders = this._getColumnHeaders().modifiable;
         const idColumn = this._getIdColumn(); // 動態獲取 ID 欄位
-        const requiredFields = ["type", "name"]; // 必填欄位名稱
 
         // 首先獲取最後一行
         const lastRow = worksheet.getUsedRange().getLastRow();
@@ -384,7 +435,7 @@ export class ExcelService {
             let missingRequired = false;
 
             // 檢查必填欄位是否有值
-            for (const field of requiredFields) {
+            for (const field of REQUIRED_FIELDS) {
               const column = columnHeaders[field];
               const value = ranges[Object.keys(columnHeaders).indexOf(field)].values[row][0];
 
