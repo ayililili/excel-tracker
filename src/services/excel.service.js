@@ -561,6 +561,12 @@ export class ExcelService {
                   cell.clear("Contents");
                 } else {
                   cell.values = [[value]];
+
+                  // 如果已標記作廢，設置整行為灰色，加刪除線
+                  if (field === "isRevoked") {
+                    rowRange.format.fill.color = "gray";
+                    rowRange.format.font.strikethrough = true;
+                  }
                 }
               }
             }
@@ -574,7 +580,7 @@ export class ExcelService {
 
             // 設置其他欄位的值
             for (const [field, value] of Object.entries(data.values)) {
-              const column = columnHeaders.modifiable[field] || columnHeaders.nonModifiable[field];
+              const column = columnHeaders.nonModifiable[field];
               if (column) {
                 const cell = worksheet.getRange(`${column}${lastRowIndex}`);
                 if (value === "") {
