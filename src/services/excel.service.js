@@ -445,7 +445,7 @@ export class ExcelService {
                 cell.format.fill.color = "red";
                 missingRequired = true;
               } else {
-                rowRange.format.fill.clear();
+                cell.format.fill.clear();
               }
             }
 
