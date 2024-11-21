@@ -93,7 +93,7 @@ class TaskPane {
     };
 
     Object.entries(changes).forEach(([id, data]) => {
-      const type = data.values.type; // 假設 'type' 欄位是指定的分類依據
+      const type = data.values.partType; // 假設 'type' 欄位是指定的分類依據
 
       if (type === "1" || type === "2") {
         groupedChanges[3][id] = data;
