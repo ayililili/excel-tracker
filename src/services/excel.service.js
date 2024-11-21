@@ -564,8 +564,9 @@ export class ExcelService {
 
                   // 如果已標記作廢，設置整行為灰色，加刪除線
                   if (field === "isRevoked") {
-                    actualRowIndex.format.fill.color = "gray";
-                    actualRowIndex.format.font.strikethrough = true;
+                    const rowRange = worksheet.getRange(`${actualRowIndex}:${actualRowIndex}`);
+                    rowRange.format.font.strikethrough = true;
+                    rowRange.format.fill.color = "gray";
                   }
                 }
               }
