@@ -94,6 +94,8 @@ class TaskPane {
 
     Object.entries(changes).forEach(([id, data]) => {
       const documentType = this.excelService.documentType;
+      console.log(documentType);
+      console.log(data);
       const partType = data.values.partType; // 假設 'type' 欄位是指定的分類依據
 
       if (documentType === "1" || documentType === "2") {
