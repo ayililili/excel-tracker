@@ -518,7 +518,7 @@ export class ExcelService {
         await this.protectWorksheet();
       }
 
-      const groupedChanges = groupChangesByType(changes);
+      const groupedChanges = this._groupChangesByType(changes);
       return groupedChanges;
     } catch (error) {
       console.error("比較狀態時發生錯誤:", error);
@@ -526,7 +526,7 @@ export class ExcelService {
     }
   }
 
-  groupChangesByType(changes) {
+  _groupChangesByType(changes) {
     const groupedChanges = {
       [DOCUMENT_TYPES.PROCESSING]: {}, // 加工件
       [DOCUMENT_TYPES.PURCHASE]: {}, // 市購件
