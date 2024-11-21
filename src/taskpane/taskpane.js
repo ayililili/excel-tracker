@@ -93,13 +93,14 @@ class TaskPane {
     };
 
     Object.entries(changes).forEach(([id, data]) => {
-      const type = data.values.partType; // 假設 'type' 欄位是指定的分類依據
+      const documentType = this.documentType;
+      const partType = data.values.partType; // 假設 'type' 欄位是指定的分類依據
 
-      if (type === "1" || type === "2") {
+      if (documentType === "1" || documentType === "2") {
         groupedChanges[3][id] = data;
-      } else if (type === "市購件") {
+      } else if (partType === "市購件") {
         groupedChanges[2][id] = data;
-      } else if (type === "加工件") {
+      } else if (partType === "加工件") {
         groupedChanges[1][id] = data;
       } else {
         groupedChanges[4][id] = data;
