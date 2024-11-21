@@ -63,27 +63,6 @@ class TaskPane {
     document.getElementById("restart").onclick = () => this.restartWorkbook();
   }
 
-  // async checkForChanges(changes) {
-  //   if (!this.isValidDocumentType) {
-  //     console.log("檔案類型無效，不進行變更檢查");
-  //     return null;
-  //   }
-
-  //   try {
-  //     const changes = await this.excelService.compareWithSnapshot();
-  //     if (changes && Object.keys(changes).length > 0) {
-  //       this.changesStore.setChanges(changes);
-  //       console.log("變更已記錄:", changes);
-  //       return changes;
-  //     }
-  //     return null;
-  //   } catch (error) {
-  //     console.error("檢查變更時發生錯誤：", error);
-  //     await this.showNotification("檢查變更時發生錯誤", "error");
-  //     throw error;
-  //   }
-  // }
-
   groupChangesByType(changes) {
     const groupedChanges = {
       1: {}, // 加工件
@@ -94,7 +73,6 @@ class TaskPane {
 
     Object.entries(changes).forEach(([id, data]) => {
       const documentType = this.excelService.documentType;
-      console.log(data);
       const partType = data.values.partType; // 假設 'type' 欄位是指定的分類依據
 
       if (documentType === 1 || documentType === 2) {

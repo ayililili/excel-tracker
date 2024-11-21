@@ -603,28 +603,4 @@ export class ExcelService {
       throw error;
     }
   }
-
-  // generateChangeReport(changes) {
-  //   const report = [];
-  //   report.push("=== Excel 工作表變更報告 ===");
-  //   report.push(`報告時間: ${new Date().toLocaleString()}`);
-  //   report.push(`文件類型: ${this.documentType}`);
-  //   if (this.documentType === 3) {
-  //     report.push(`部門: ${this.departmentName}`);
-  //     report.push(`專案號: ${this.projectNumber}`);
-  //   }
-  //   report.push("");
-
-  //   Object.entries(changes).forEach(([id, change]) => {
-  //     report.push(`ID: ${id}`);
-  //     report.push(`時間: ${change.timestamp}`);
-  //     report.push("變更內容:");
-  //     Object.entries(change.values).forEach(([column, value]) => {
-  //       report.push(`  ${column}: ${value}`);
-  //     });
-  //     report.push("");
-  //   });
-
-  //   return report.join("\n");
-  // }
 }
