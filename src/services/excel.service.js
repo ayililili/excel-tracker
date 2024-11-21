@@ -224,8 +224,8 @@ export class ExcelService {
 
         const headerValue = headerCell.values[0][0];
 
-        // 匹配 ID(****) 格式，其中 **** 為四位數字
-        const match = headerValue?.match(/ID\((\d{4})\)/);
+        // 匹配 流水序號(****) 格式，其中 **** 為四位數字
+        const match = headerValue?.match(/流水序號\((\d{4})\)/);
 
         if (match) {
           const serialNum = parseInt(match[1], 10);
@@ -237,7 +237,7 @@ export class ExcelService {
             this.serialCounter = 0; // 預設值
           }
         } else {
-          console.warn(`${idColumn}1 儲存格格式不符合預期 (應為 'ID(####)' 格式)`);
+          console.warn(`${idColumn}1 儲存格格式不符合預期 (應為 '流水序號(####)' 格式)`);
           this.serialCounter = 0; // 預設值
         }
       });
@@ -263,7 +263,7 @@ export class ExcelService {
         const headerCell = worksheet.getRange(`${idColumn}1`);
 
         // 設置新的 ID 值
-        const newHeaderValue = `ID(${String(this.serialCounter).padStart(4, "0")})`;
+        const newHeaderValue = `流水序號(${String(this.serialCounter).padStart(4, "0")})`;
         headerCell.values = [[newHeaderValue]];
 
         await context.sync();
