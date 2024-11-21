@@ -395,8 +395,6 @@ export class ExcelService {
         const worksheet = context.workbook.worksheets.getActiveWorksheet();
         const columnHeaders = this._getColumnHeaders().modifiable;
         const idColumn = this._getIdColumn(); // 動態獲取 ID 欄位
-        const isRevokedColum = columnHeaders.isRevoked;
-        console.log(isRevokedColum);
 
         // 首先獲取最後一行
         const lastRow = worksheet.getUsedRange().getLastRow();
@@ -464,6 +462,15 @@ export class ExcelService {
             Object.entries(columnHeaders).forEach(([key, _], index) => {
               const value = ranges[index].values[row][0];
               currentValues[key] = value || "";
+
+              // 如果已標記作廢，設置整行為灰色，加刪除線
+              if (key === "isRevoked") {
+                rowRange.format.fill.color = "#D3D3D3"; // 淺灰色
+                rowRange.format.font.strikethrough = true;
+
+                // 鎖定整行，防止編輯
+                rowRange.protection.locked = true;
+              }
             });
 
             // 比較與快照的差異
