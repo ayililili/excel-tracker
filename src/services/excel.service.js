@@ -486,7 +486,9 @@ export class ExcelService {
                 isSync: false,
               };
             }
+            // 新增專案號
             if (this.documentType === DOCUMENT_TYPES.DEPARTMENT && changes[id]) {
+              console.log(changes[id].values);
               changes[id].values.projectNumber = this.projectNumber;
             }
           }
