@@ -348,8 +348,6 @@ export class ExcelService {
 
           if (id && !this.validateId(id)) {
             rowRange.format.fill.color = "red";
-          } else if (id && this.validateId(id)) {
-            rowRange.format.fill.clear();
           }
 
           if (id) {
