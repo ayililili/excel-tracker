@@ -479,8 +479,9 @@ export class ExcelService {
                 rowRange.format.protection.locked = true;
               }
               // 如果是 partType 欄位，檢查是否已經有值
-              else if (key === "partType" && value) {
-                const partTypeCell = worksheet.getRange(`${index}${row + 1}`);
+              else if (currentValues.partType) {
+                const partTypeCell = rowRange.getCell(0, columnHeaders.partType);
+                console.log(columnHeaders.partType);
                 partTypeCell.format.protection.locked = true;
               }
             });
