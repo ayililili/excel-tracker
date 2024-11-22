@@ -421,10 +421,7 @@ export class ExcelService {
         // 跳過標題行，從第二行開始
         for (let row = 1; row < idValues.length; row++) {
           let id = idValues[row][0];
-          const rowHasData = Object.values(columnHeaders).some((_, index) => {
-            console.log(index);
-            ranges[index].values[row][0] !== "";
-          });
+          const rowHasData = Object.values(columnHeaders).some((_, index) => ranges[index].values[row][0] !== "");
 
           // 處理空白ID的情況
           if (!id && this.documentType === DOCUMENT_TYPES.DEPARTMENT && rowHasData) {
@@ -483,8 +480,7 @@ export class ExcelService {
               }
               // 如果是 partType 欄位，檢查是否已經有值
               else if (currentValues.partType) {
-                const partTypeCell = rowRange.getCell(0, columnHeaders.partType);
-                console.log(columnHeaders.partType);
+                const partTypeCell = `${columnHeaders.partType}${row + 1}`;
                 partTypeCell.format.protection.locked = true;
               }
             });
