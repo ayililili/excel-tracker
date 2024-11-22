@@ -421,7 +421,10 @@ export class ExcelService {
         // 跳過標題行，從第二行開始
         for (let row = 1; row < idValues.length; row++) {
           let id = idValues[row][0];
-          const rowHasData = Object.values(columnHeaders).some((_, index) => ranges[index].values[row][0] !== "");
+          const rowHasData = Object.values(columnHeaders).some((_, index) => {
+            console.log(index);
+            ranges[index].values[row][0] !== "";
+          });
 
           // 處理空白ID的情況
           if (!id && this.documentType === DOCUMENT_TYPES.DEPARTMENT && rowHasData) {
