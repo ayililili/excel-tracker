@@ -480,7 +480,7 @@ export class ExcelService {
               }
               // 如果是 partType 欄位，檢查是否已經有值
               else if (currentValues.partType) {
-                const partTypeCell = `${columnHeaders.partType}${row + 1}`;
+                const partTypeCell = worksheet.getRange(`${columnHeaders.partType}${row + 1}`);
                 partTypeCell.format.protection.locked = true;
               }
             });
