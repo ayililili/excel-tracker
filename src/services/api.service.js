@@ -1,5 +1,5 @@
 export class ApiService {
-  constructor(baseUrl = "http://localhost:3001") {
+  constructor(baseUrl = "https://dt-boost.com:3001") {
     this.baseUrl = baseUrl;
   }
 
