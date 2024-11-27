@@ -5,8 +5,10 @@
 
 /* global Office */
 
-Office.onReady(() => {
-  // If needed, Office.js is ready to be called.
+Office.onReady((info) => {
+  if (info.host === Office.HostType.Excel) {
+    console.log("Add-in is ready");
+  }
 });
 
 /**
