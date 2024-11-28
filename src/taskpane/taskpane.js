@@ -71,7 +71,6 @@ class TaskPane {
 
     try {
       const changes = await this.excelService.compareWithSnapshot();
-      console.log(changes);
       if (changes) {
         if (Object.keys(changes[1]).length > 0) {
           await this.apiService.sendChanges(1, changes[1]);
@@ -84,6 +83,7 @@ class TaskPane {
         }
         await this.showNotification("數據已成功上傳", "success");
         console.log("數據已成功上傳到 API");
+        console.log("ssssss");
 
         await this.excelService.captureSnapshot();
         console.log("已捕獲新快照");
