@@ -1,6 +1,5 @@
 export class ApiService {
-  // constructor(baseUrl = "https://api.dt-boost.com/api") {
-  constructor(baseUrl = "http://localhost:3002/api") {
+  constructor(baseUrl = "https://api.dt-boost.com/api") {
     this.baseUrl = baseUrl;
   }
 
