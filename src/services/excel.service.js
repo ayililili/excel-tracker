@@ -532,11 +532,7 @@ export class ExcelService {
   }
 
   _groupChangesByType(changes) {
-    const groupedChanges = {
-      [DOCUMENT_TYPES.PROCESSING]: {}, // 加工件
-      [DOCUMENT_TYPES.PURCHASE]: {}, // 市購件
-      [DOCUMENT_TYPES.DEPARTMENT]: {}, // 檔案類型是1或2
-    };
+    const groupedChanges = {};
 
     for (const [id, changeData] of Object.entries(changes)) {
       const documentType = this.documentType;
@@ -545,12 +541,23 @@ export class ExcelService {
       if (documentType === DOCUMENT_TYPES.PROCESSING || documentType === DOCUMENT_TYPES.PURCHASE) {
         const department = this._extractDepartment(id);
         const projectNumber = this._extractProjectNumber(id);
-        console.log(department, projectNumber);
-        groupedChanges[DOCUMENT_TYPES.DEPARTMENT][projectNumber] = changeData;
-        console.log(groupedChanges[DOCUMENT_TYPES.DEPARTMENT]);
+
+        // 確保各層級已初始化
+        groupedChanges[DOCUMENT_TYPES.DEPARTMENT] = groupedChanges[DOCUMENT_TYPES.DEPARTMENT] || {};
+        groupedChanges[DOCUMENT_TYPES.DEPARTMENT][projectNumber] =
+          groupedChanges[DOCUMENT_TYPES.DEPARTMENT][projectNumber] || {};
+        groupedChanges[DOCUMENT_TYPES.DEPARTMENT][projectNumber][department] =
+          groupedChanges[DOCUMENT_TYPES.DEPARTMENT][projectNumber][department] || {};
+
+        // 設定值
+        groupedChanges[DOCUMENT_TYPES.DEPARTMENT][projectNumber][department][id] = changeData;
       } else if (PART_TYPES.processing.includes(partType)) {
+        // 初始化並設定 PROCESSING
+        groupedChanges[DOCUMENT_TYPES.PROCESSING] = groupedChanges[DOCUMENT_TYPES.PROCESSING] || {};
         groupedChanges[DOCUMENT_TYPES.PROCESSING][id] = changeData;
       } else if (PART_TYPES.purchase.includes(partType)) {
+        // 初始化並設定 PURCHASE
+        groupedChanges[DOCUMENT_TYPES.PURCHASE] = groupedChanges[DOCUMENT_TYPES.PURCHASE] || {};
         groupedChanges[DOCUMENT_TYPES.PURCHASE][id] = changeData;
       }
     }
