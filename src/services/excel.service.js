@@ -463,7 +463,6 @@ export class ExcelService {
           }
 
           if (id) {
-            console.log("he");
             const currentValues = {};
 
             // 使用欄位名稱作為key來獲取值
@@ -525,7 +524,6 @@ export class ExcelService {
       }
 
       const groupedChanges = this._groupChangesByType(changes);
-      console.log("hi");
       return groupedChanges;
     } catch (error) {
       console.error("比較狀態時發生錯誤:", error);
@@ -540,7 +538,6 @@ export class ExcelService {
       [DOCUMENT_TYPES.DEPARTMENT]: {}, // 檔案類型是1或2
     };
 
-    console.log("ho");
     for (const [id, changeData] of Object.entries(changes)) {
       const documentType = this.documentType;
       const partType = changeData.values.partType;

@@ -71,6 +71,7 @@ class TaskPane {
 
     try {
       const changes = await this.excelService.compareWithSnapshot();
+      console.log(changes);
       if (changes) {
         if (Object.keys(changes[1]).length > 0) {
           await this.apiService.sendChanges(1, changes[1]);
