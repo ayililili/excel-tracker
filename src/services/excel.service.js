@@ -539,8 +539,8 @@ export class ExcelService {
     };
 
     for (const [id, changeData] of Object.entries(changes)) {
-      // const documentType = this.documentType;
-      // const partType = changeData.values.partType;
+      const documentType = this.documentType;
+      const partType = changeData.values.partType;
 
       if (documentType === DOCUMENT_TYPES.PROCESSING || documentType === DOCUMENT_TYPES.PURCHASE) {
         // const department = this._extractDepartment(id);
