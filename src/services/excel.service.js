@@ -543,7 +543,9 @@ export class ExcelService {
       const partType = changeData.values.partType;
 
       if (documentType === DOCUMENT_TYPES.PROCESSING || documentType === DOCUMENT_TYPES.PURCHASE) {
-        groupedChanges[DOCUMENT_TYPES.DEPARTMENT][id] = changeData;
+        const department = _extractDepartment(id);
+        const projectNumber = this._extractProjectNumber(id);
+        groupedChanges[DOCUMENT_TYPES.DEPARTMENT][projectNumber][department][id] = changeData;
       } else if (PART_TYPES.processing.includes(partType)) {
         groupedChanges[DOCUMENT_TYPES.PROCESSING][id] = changeData;
       } else if (PART_TYPES.purchase.includes(partType)) {
@@ -552,6 +554,19 @@ export class ExcelService {
     }
 
     return groupedChanges;
+  }
+
+  _extractDepartment(id) {
+    const department = id.split("_")[0];
+    return department;
+  }
+
+  _extractProjectNumber(id) {
+    const parts = id.split("_");
+    if (parts.length >= 2) {
+      return parts[1];
+    }
+    return null;
   }
 
   async updateFromApiData(apiData) {
