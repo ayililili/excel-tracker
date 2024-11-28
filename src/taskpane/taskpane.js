@@ -83,7 +83,6 @@ class TaskPane {
         }
         await this.showNotification("數據已成功上傳", "success");
         console.log("數據已成功上傳到 API");
-        console.log("ssssss");
 
         await this.excelService.captureSnapshot();
         console.log("已捕獲新快照");
