@@ -524,7 +524,7 @@ export class ExcelService {
       }
 
       const groupedChanges = this._groupChangesByType(changes);
-      console.log(groupedChanges);
+      console.log("hi");
       return groupedChanges;
     } catch (error) {
       console.error("比較狀態時發生錯誤:", error);
@@ -539,6 +539,7 @@ export class ExcelService {
       [DOCUMENT_TYPES.DEPARTMENT]: {}, // 檔案類型是1或2
     };
 
+    console.log("ho");
     for (const [id, changeData] of Object.entries(changes)) {
       const documentType = this.documentType;
       const partType = changeData.values.partType;
