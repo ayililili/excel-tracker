@@ -463,6 +463,7 @@ export class ExcelService {
           }
 
           if (id) {
+            console.log("he");
             const currentValues = {};
 
             // 使用欄位名稱作為key來獲取值
