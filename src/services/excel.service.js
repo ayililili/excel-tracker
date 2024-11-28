@@ -608,6 +608,7 @@ export class ExcelService {
           if (this.documentType === DOCUMENT_TYPES.DEPARTMENT) {
             const department = this._extractDepartment(id);
             const projectNumber = this._extractProjectNumber(id);
+
             if (this.departmentName !== department || this.projectNumber !== projectNumber) {
               continue;
             }
