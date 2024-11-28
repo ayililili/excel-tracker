@@ -539,21 +539,22 @@ export class ExcelService {
     };
 
     for (const [id, changeData] of Object.entries(changes)) {
-      const documentType = this.documentType;
-      const partType = changeData.values.partType;
+      // const documentType = this.documentType;
+      // const partType = changeData.values.partType;
 
       if (documentType === DOCUMENT_TYPES.PROCESSING || documentType === DOCUMENT_TYPES.PURCHASE) {
-        const department = this._extractDepartment(id);
-        const projectNumber = this._extractProjectNumber(id);
+        // const department = this._extractDepartment(id);
+        // const projectNumber = this._extractProjectNumber(id);
 
-        // 確保各層級已初始化
-        groupedChanges[DOCUMENT_TYPES.DEPARTMENT][projectNumber] =
-          groupedChanges[DOCUMENT_TYPES.DEPARTMENT][projectNumber] || {};
-        groupedChanges[DOCUMENT_TYPES.DEPARTMENT][projectNumber][department] =
-          groupedChanges[DOCUMENT_TYPES.DEPARTMENT][projectNumber][department] || {};
+        // // 確保各層級已初始化
+        // groupedChanges[DOCUMENT_TYPES.DEPARTMENT][projectNumber] =
+        //   groupedChanges[DOCUMENT_TYPES.DEPARTMENT][projectNumber] || {};
+        // groupedChanges[DOCUMENT_TYPES.DEPARTMENT][projectNumber][department] =
+        //   groupedChanges[DOCUMENT_TYPES.DEPARTMENT][projectNumber][department] || {};
 
-        // 設定值
-        groupedChanges[DOCUMENT_TYPES.DEPARTMENT][projectNumber][department][id] = changeData;
+        // // 設定值
+        // groupedChanges[DOCUMENT_TYPES.DEPARTMENT][projectNumber][department][id] = changeData;
+        groupedChanges[DOCUMENT_TYPES.DEPARTMENT][id] = changeData;
       } else if (PART_TYPES.processing.includes(partType)) {
         // 設定 PROCESSING
         groupedChanges[DOCUMENT_TYPES.PROCESSING][id] = changeData;
@@ -604,6 +605,14 @@ export class ExcelService {
 
         // 處理每個API數據項
         for (const [id, data] of Object.entries(apiData)) {
+          if (this.documentType === DOCUMENT_TYPES.DEPARTMENT) {
+            const department = this._extractDepartment(id);
+            const projectNumber = this._extractProjectNumber(id);
+            if (this.departmentName !== department || this.projectNumber !== projectNumber) {
+              continue;
+            }
+          }
+
           // 在現有數據中查找ID
           const existingRowIndex = idRange.values.findIndex((row) => row[0] === id);
 
