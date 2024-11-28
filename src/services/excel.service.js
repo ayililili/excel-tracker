@@ -524,6 +524,7 @@ export class ExcelService {
       }
 
       const groupedChanges = this._groupChangesByType(changes);
+      console.log(groupedChanges);
       return groupedChanges;
     } catch (error) {
       console.error("比較狀態時發生錯誤:", error);
