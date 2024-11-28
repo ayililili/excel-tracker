@@ -546,7 +546,7 @@ export class ExcelService {
         const department = this._extractDepartment(id);
         const projectNumber = this._extractProjectNumber(id);
         console.log(department, projectNumber);
-        groupedChanges[DOCUMENT_TYPES.DEPARTMENT][projectNumber][department][id] = changeData;
+        groupedChanges[DOCUMENT_TYPES.DEPARTMENT][projectNumber] = changeData;
         console.log(groupedChanges[DOCUMENT_TYPES.DEPARTMENT]);
       } else if (PART_TYPES.processing.includes(partType)) {
         groupedChanges[DOCUMENT_TYPES.PROCESSING][id] = changeData;
