@@ -543,7 +543,7 @@ export class ExcelService {
       const partType = changeData.values.partType;
 
       if (documentType === DOCUMENT_TYPES.PROCESSING || documentType === DOCUMENT_TYPES.PURCHASE) {
-        const department = _extractDepartment(id);
+        const department = this._extractDepartment(id);
         const projectNumber = this._extractProjectNumber(id);
         groupedChanges[DOCUMENT_TYPES.DEPARTMENT][projectNumber][department][id] = changeData;
       } else if (PART_TYPES.processing.includes(partType)) {
