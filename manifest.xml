@@ -77,7 +77,7 @@
         <bt:String id="TaskpaneButton.Label" DefaultValue="BOM Sync"/>
       </bt:ShortStrings>
       <bt:LongStrings>
-        <bt:String id="GetStarted.Description" DefaultValue="BOM Sync"/>
+        <bt:String id="GetStarted.Description" DefaultValue="BOM表自動同步小程式"/>
         <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Click to Show BOM Sync"/>
       </bt:LongStrings>
     </Resources>
